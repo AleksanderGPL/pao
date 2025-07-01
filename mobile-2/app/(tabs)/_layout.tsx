@@ -72,9 +72,9 @@ export default function TabLayout() {
         }}
         backBehavior="history">
         <Tabs.Screen
-          name="diary"
+          name="explore"
           options={{
-            title: 'Diary',
+            title: 'Explore',
             tabBarIcon: ({ color, focused }) => (
               <Icon
                 size={25}
@@ -92,22 +92,6 @@ export default function TabLayout() {
               <Icon
                 size={25}
                 icon={Home}
-                className={focused ? 'text-foreground/90' : 'text-foregroundMuted/70'}
-              />
-            ),
-            tabBarButton: (props) => (
-              <View className="-m-100" style={[StyleSheet.absoluteFillObject]} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="calendar"
-          options={{
-            title: 'Calendar',
-            tabBarIcon: ({ color, focused }) => (
-              <Icon
-                size={25}
-                icon={Calendar}
                 className={focused ? 'text-foreground/90' : 'text-foregroundMuted/70'}
               />
             ),
