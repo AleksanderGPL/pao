@@ -1,4 +1,4 @@
-# PAO – The Game Where Your Friends Betray You (Lovingly)
+# PAO – The Game Where Your Friends Betray You
 
 https://github.com/AleksanderGPL/pao/raw/refs/heads/main/.assets/paointro.mp4
 
