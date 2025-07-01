@@ -1,13 +1,20 @@
 {
   "imports": {
-    "hono": "jsr:@hono/hono@^4.8.3"
+    "@types/pg": "npm:@types/pg@^8.15.4",
+    "drizzle-kit": "npm:drizzle-kit@^0.31.4",
+    "drizzle-orm": "npm:drizzle-orm@^0.44.2",
+    "hono": "jsr:@hono/hono@^4.8.3",
+    "pg": "npm:pg@^8.16.3",
+    "@/": "./"
   },
   "tasks": {
-    "start": "deno run --allow-net main.ts",
-    "dev": "deno run --allow-net --watch main.ts"
+    "start": "deno run --allow-net --allow-env main.ts",
+    "dev": "deno run --allow-net --allow-env --env-file=.env --watch main.ts",
+    "db:push": "drizzle-kit push"
   },
   "compilerOptions": {
     "jsx": "precompile",
     "jsxImportSource": "hono/jsx"
-  }
+  },
+  "nodeModulesDir": "auto"
 }
