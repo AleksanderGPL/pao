@@ -3,65 +3,47 @@
 @tailwind utilities;
 
 @layer base {
-  /* Light theme (default) */
-  :root {
-    --color-primary: 220 14% 11%;
-    --color-background: 216, 17%, 94%;
-    --color-card: 0 0% 100%;
-    --color-foreground: 221, 39%, 11%;
-    --color-foreground-muted: 215, 14%, 34%;
-    --color-accent: 208, 88%, 61%;
-    --color-accent-muted: 214 71% 74%;
-    --color-card: 0 0% 100%;
-    --color-border: 214 32% 91%;
-    --color-input: 214 32% 91%;
-    --color-ring: 214 71% 74%;
-    --color-muted: 210 40% 96%;
-    --color-muted-foreground: 215 20% 35%;
-    --color-destructive: 0 84% 60%;
-    --color-destructive-foreground: 210 40% 98%;
-    --color-sim-bg: 215, 14%, 34%;
-  }
-
-  /* Dark theme */
-  @media (prefers-color-scheme: dark) {
     :root {
-      --color-primary: 210 40% 98%;
-      --color-background: 222 84% 5%;
-      --color-card: 220 14% 11%;
-      --color-foreground: 210 40% 98%;
-      --color-foreground-muted: 215 20% 65%;
-      --color-accent: 210 83% 59%;
-      --color-accent-muted: 214 71% 74%;
-      --color-card: 220 14% 11%;
-      --color-border: 215 27% 17%;
-      --color-input: 215 27% 17%;
-      --color-ring: 214 71% 74%;
-      --color-muted: 220 14% 11%;
-      --color-muted-foreground: 215 20% 65%;
-      --color-destructive: 0 84% 60%;
-      --color-destructive-foreground: 210 40% 98%;
-      --color-sim-bg: 210 10% 48%;
+        --background: 0 0% 100%;
+        --foreground: 240 10% 3.9%;
+        --card: 0 0% 100%;
+        --card-foreground: 240 10% 3.9%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 240 10% 3.9%;
+        --primary: 240 5.9% 10%;
+        --primary-foreground: 0 0% 98%;
+        --secondary: 240 4.8% 95.9%;
+        --secondary-foreground: 240 5.9% 10%;
+        --muted: 240 4.8% 95.9%;
+        --muted-foreground: 240 3.8% 46.1%;
+        --accent: 240 4.8% 95.9%;
+        --accent-foreground: 240 5.9% 10%;
+        --destructive: 0 84.2% 60.2%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 240 5.9% 90%;
+        --input: 240 5.9% 90%;
+        --ring: 240 5.9% 10%;
     }
-  }
-}
 
-/* Override styles for manual dark mode when using class strategy */
-.dark {
-  --color-primary: 210 40% 98%;
-  --color-background: 222 84% 5%;
-  --color-card: 220 14% 11%;
-  --color-foreground: 210 40% 98%;
-  --color-foreground-muted: 215 20% 65%;
-  --color-accent: 210 83% 59%;
-  --color-accent-muted: 214 71% 74%;
-  --color-card: 220 14% 11%;
-  --color-border: 215 27% 17%;
-  --color-input: 215 27% 17%;
-  --color-ring: 214 71% 74%;
-  --color-muted: 220 14% 11%;
-  --color-muted-foreground: 215 20% 65%;
-  --color-destructive: 0 84% 60%;
-  --color-destructive-foreground: 210 40% 98%;
-  --color-sim-bg: 210 10% 48%;
+    .dark:root {
+        --background: 240 10% 3.9%;
+        --foreground: 0 0% 98%;
+        --card: 240 10% 3.9%;
+        --card-foreground: 0 0% 98%;
+        --popover: 240 10% 3.9%;
+        --popover-foreground: 0 0% 98%;
+        --primary: 0 0% 98%;
+        --primary-foreground: 240 5.9% 10%;
+        --secondary: 240 3.7% 15.9%;
+        --secondary-foreground: 0 0% 98%;
+        --muted: 240 3.7% 15.9%;
+        --muted-foreground: 240 5% 64.9%;
+        --accent: 240 3.7% 15.9%;
+        --accent-foreground: 0 0% 98%;
+        --destructive: 0 72% 51%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 240 3.7% 15.9%;
+        --input: 240 3.7% 15.9%;
+        --ring: 240 4.9% 83.9%;
+    }
 }
