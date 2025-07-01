@@ -1,6 +1,6 @@
 # PAO – The Game Where Your Friends Betray You (Lovingly)
 
-![Starter Video](.assets/paointro.mp4)
+![Starter Video](https://github.com/AleksanderGPL/pao/blob/main/.assets/paointro.mp4)
 
 ## Okay so here's the deal
 
