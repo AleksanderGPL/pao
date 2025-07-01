@@ -1,7 +1,9 @@
 # PAO – The Game Where Your Friends Betray You (Lovingly)
 
-![Starter Video](https://github.com/AleksanderGPL/pao/blob/main/.assets/paointro.mp4)
-
+<figure class="video_container">
+  <iframe src=".assets/paointro.mp4" frameborder="0" allowfullscreen="true"> 
+</iframe>
+</figure>
 ## Okay so here's the deal
 
 You and your friends are hanging out. Everything seems normal.  
