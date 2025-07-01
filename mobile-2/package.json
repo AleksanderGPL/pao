@@ -12,15 +12,25 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~5.0.4",
+    "@react-navigation/native": "^7.1.14",
+    "@react-navigation/native-stack": "^7.3.21",
+    "clsx": "^2.1.1",
     "expo": "~53.0.15",
+    "expo-constants": "^17.1.6",
+    "expo-font": "^13.3.2",
+    "expo-haptics": "^14.1.4",
+    "expo-linking": "^7.1.6",
+    "expo-router": "^5.1.2",
     "expo-status-bar": "~2.2.3",
+    "lucide-react-native": "^0.525.0",
     "nativewind": "latest",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.4",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
-    "react-native-web": "^0.20.0"
+    "react-native-web": "^0.20.0",
+    "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
@@ -33,7 +43,7 @@
     "tailwindcss": "^3.4.0",
     "typescript": "~5.8.3"
   },
-  "main": "node_modules/expo/AppEntry.js",
+  "main": "expo-router/entry",
   "private": true,
   "packageManager": "pnpm@10.4.1+sha512.c753b6c3ad7afa13af388fa6d808035a008e30ea9993f58c6663e2bc5ff21679aa834db094987129aa4d488b86df57f7b634981b2f827cdcacc698cc0cfb88af"
 }
