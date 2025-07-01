@@ -1,11 +1,8 @@
 # PAO – The Game Where Your Friends Betray You (Lovingly)
 
-<figure class="video_container">
-  <iframe src=".assets/paointro.mp4" frameborder="0" allowfullscreen="true"> 
-</iframe>
-</figure>
-## Okay so here's the deal
+https://github.com/AleksanderGPL/pao/raw/refs/heads/main/.assets/paointro.mp4
 
+## Okay so here's the deal
 You and your friends are hanging out. Everything seems normal.  
 But secretly… you're all *trying to eliminate each other.*  
 How?  
