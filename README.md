@@ -1,6 +1,7 @@
 # PAO – The Game Where Your Friends Betray You
 
-https://github.com/AleksanderGPL/pao/raw/refs/heads/main/.assets/paointro.mp4
+
+https://github.com/user-attachments/assets/6f960a43-37cf-4df7-9148-aaf52ee15378
 
 ## Okay so here's the deal
 You and your friends are hanging out. Everything seems normal.  
