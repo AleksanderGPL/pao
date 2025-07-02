@@ -38,7 +38,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <View className="h-full flex-1 bg-red-500 p-10">
+    <View className="h-full flex-1 p-5">
       <Text className="w-full pb-5 text-center text-3xl leading-[3rem]">Join a game</Text>
 
       <View>
