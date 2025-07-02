@@ -74,7 +74,7 @@ export default function HomeScreen() {
         </Text>
         <Text className="text-lg text-gray-500 text-center mt-2">
           {username
-            ? 'Ready to play? Scan a code or enter one below to join a game.'
+            ? 'Ready to play? Scan a QR code or enter one below to join a game.'
             : 'Scan a QR code or enter a game code to get started.'}
         </Text>
       </View>
