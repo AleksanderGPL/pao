@@ -67,6 +67,7 @@ export default function TabLayout() {
               borderRadius: 20,
               marginHorizontal: 20,
               marginBottom: 20,
+              position: 'absolute',
             },
           }),
 

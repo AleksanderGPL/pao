@@ -13,6 +13,13 @@ export default function RootLayout() {
     <ThemeProvider defaultTheme="system">
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="game"
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+          }}
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

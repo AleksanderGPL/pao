@@ -41,14 +41,7 @@ export default function LoadingScreen() {
       true
     );
 
-    // Simulate joining game process
-    const timer = setTimeout(() => {
-      setIsJoining(false);
-      // TODO: Replace with actual game joining logic
-      console.log('Attempting to join game with code:', gameCode);
-    }, 3000);
-
-    return () => clearTimeout(timer);
+    console.log('Attempting to join game with code:', gameCode);
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => {

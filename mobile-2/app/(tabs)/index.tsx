@@ -12,19 +12,33 @@ import { Input } from '@/components/Input';
 export default function HomeScreen() {
   const [gameCode, setGameCode] = useState('');
   const [permission, requestPermission] = useCameraPermissions();
+  const router = useRouter();
+
+  function isValidGameCode(code: string): boolean {
+    const trimmedCode = code.trim();
+    return trimmedCode.length === 8 && /^[A-Za-z]+$/.test(trimmedCode);
+  }
 
   function handleJoinGame() {
-    console.log(gameCode);
-    // TODO (aleksander): Join game
+    router.push({
+      pathname: '/game',
+      params: { gameCode: gameCode.trim() },
+    });
   }
 
   function handleBarcodeScanned({ type, data }: { type: string; data: string }) {
     console.log('QR Code scanned:', data);
     setGameCode(data);
+    // Navigate to loading screen immediately after scanning
+
+    router.push({
+      pathname: '/game',
+      params: { gameCode: data.trim() },
+    });
   }
 
   return (
-    <View className="flex-1 p-10">
+    <View className="h-full flex-1 bg-red-500 p-10">
       <Text className="w-full pb-5 text-center text-3xl leading-[3rem]">Join a game</Text>
 
       <View>
@@ -72,8 +86,10 @@ export default function HomeScreen() {
                   setGameCode(text);
                 }}
               />
-              <Button variant="outline" onPress={handleJoinGame}>
-                <Text>Join Game</Text>
+              <Button variant={'outline'} onPress={handleJoinGame}>
+                <Text className={!isValidGameCode(gameCode) ? 'text-muted-foreground' : ''}>
+                  Join Game
+                </Text>
               </Button>
             </View>
           </View>
