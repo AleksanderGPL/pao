@@ -76,9 +76,9 @@ export default function TabLayout() {
         }}
         backBehavior="history">
         <Tabs.Screen
-          name="explore"
+          name="index"
           options={{
-            title: 'Explore',
+            title: 'Join',
             tabBarIcon: ({ color, focused }) => (
               <Icon
                 size={25}
@@ -89,9 +89,9 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="index"
+          name="create"
           options={{
-            title: 'Home',
+            title: 'Create',
             tabBarIcon: ({ color, focused }) => (
               <Icon
                 size={25}

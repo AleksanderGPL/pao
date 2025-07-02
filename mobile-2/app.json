@@ -12,7 +12,16 @@
       "tsconfigPaths": true
     },
 
-    "plugins": [],
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan QR codes",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": false
+        }
+      ]
+    ],
 
     "orientation": "portrait",
     "icon": "./assets/icon.png",
