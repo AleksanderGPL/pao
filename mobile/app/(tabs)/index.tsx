@@ -12,6 +12,7 @@ import { Input } from '@/components/Input';
 export default function HomeScreen() {
   const [gameCode, setGameCode] = useState('');
   const [permission, requestPermission] = useCameraPermissions();
+  const [hasScanned, setHasScanned] = useState(false);
   const router = useRouter();
 
   function isValidGameCode(code: string): boolean {
@@ -27,10 +28,13 @@ export default function HomeScreen() {
   }
 
   function handleBarcodeScanned({ type, data }: { type: string; data: string }) {
+    if (hasScanned) return; // Prevent multiple scans
+    
     console.log('QR Code scanned:', data);
     setGameCode(data);
+    setHasScanned(true); // Mark as scanned to prevent multiple scans
+    
     // Navigate to loading screen immediately after scanning
-
     router.push({
       pathname: '/game',
       params: { gameCode: data.trim() },
@@ -60,6 +64,10 @@ export default function HomeScreen() {
                       <Text>Grant Permission</Text>
                     </Button>
                   </View>
+                ) : hasScanned ? (
+                  <View className="size-full items-center justify-center rounded-lg bg-gray-200">
+                    <Text className="text-center text-gray-500">QR Code scanned! Redirecting...</Text>
+                  </View>
                 ) : (
                   <View className="size-full overflow-hidden rounded-lg">
                     <CameraView
@@ -74,7 +82,7 @@ export default function HomeScreen() {
                 )}
               </View>
               <Text className="mt-2 text-center text-sm text-gray-600">
-                Point camera at QR code to scan
+                {hasScanned ? 'Redirecting to game...' : 'Point camera at QR code to scan'}
               </Text>
             </View>
             {/* Input Section */}
