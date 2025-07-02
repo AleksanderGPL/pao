@@ -168,11 +168,7 @@ export const ActiveGameScreen = ({
           <CardContent>
             <View className="space-y-2">
               <View className="flex-row justify-between">
-                <Text className="text-muted-foreground">Time Remaining</Text>
-                <Text className="font-semibold">{formatTimeRemaining(gameInfo.timeRemaining)}</Text>
-              </View>
-              <View className="flex-row justify-between">
-                <Text className="text-muted-foreground">Eliminations Today</Text>
+                <Text className="text-muted-foreground">Eliminations</Text>
                 <Text className="font-semibold">{gameInfo.eliminationsToday}</Text>
               </View>
               <View className="flex-row justify-between">

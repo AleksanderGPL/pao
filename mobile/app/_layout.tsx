@@ -1,5 +1,5 @@
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme as useDeviceColorScheme } from 'react-native';
 import 'react-native-reanimated';
@@ -10,10 +10,10 @@ import { useEffect } from 'react';
 
 export default function RootLayout() {
   const deviceColorScheme = useDeviceColorScheme();
-
+  const pathname = usePathname();
 
   useEffect(() => {
-    checkUserAuth();
+    checkUserAuth(pathname);
   }, []);
 
   return (
