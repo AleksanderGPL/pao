@@ -2,6 +2,9 @@ import { Platform, View } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useState, useEffect } from 'react';
 import { useRouter, useFocusEffect } from 'expo-router';
+import React from 'react';
+import { ArrowLeft } from 'lucide-react-native';
+import { BlurView } from 'expo-blur';
 
 import { ThemedText } from 'components/ThemedText';
 import { ThemedView } from 'components/ThemedView';
@@ -16,10 +19,12 @@ export default function HomeScreen() {
   const router = useRouter();
 
   // Reset QR scanning state when screen comes into focus
-  useFocusEffect(() => {
-    setHasScanned(false);
-    setGameCode('');
-  });
+  useFocusEffect(
+    React.useCallback(() => {
+      setHasScanned(false);
+      setGameCode('');
+    }, [])
+  );
 
   function isValidGameCode(code: string): boolean {
     const trimmedCode = code.trim();
@@ -49,20 +54,32 @@ export default function HomeScreen() {
 
   return (
     <View className="h-full flex-1 p-5">
+      {/* Back Button */}
+      <View className="mb-4">
+        <Button variant="outline" onPress={() => router.replace('/username')} className="self-start">
+          <View className="flex-row items-center gap-2">
+            <ArrowLeft size={18} />
+            <Text>Back</Text>
+          </View>
+        </Button>
+      </View>
       <Text className="w-full pb-5 text-center text-3xl leading-[3rem]">Join a game</Text>
 
       <View>
         <View>
           <View className="gap-4">
             {/* Camera View */}
-            <View>
-              <View className="aspect-square w-full items-center">
+            <View className="w-full items-center" style={{ aspectRatio: 3 / 4 }}>
+              <BlurView intensity={40} tint="light" style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: 24, overflow: 'hidden' }}>
+                {/* Camera or fallback content goes here */}
+              </BlurView>
+              <View style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: 24, overflow: 'hidden' }}>
                 {!permission ? (
-                  <View className="size-full items-center justify-center rounded-lg bg-gray-200">
+                  <View className="size-full items-center justify-center rounded-lg bg-gray-200" style={{ borderRadius: 24 }}>
                     <Text className="text-center text-gray-500">Loading camera...</Text>
                   </View>
                 ) : !permission.granted ? (
-                  <View className="size-full items-center justify-center rounded-lg bg-gray-200 p-4">
+                  <View className="size-full items-center justify-center rounded-lg bg-gray-200 p-4" style={{ borderRadius: 24 }}>
                     <Text className="mb-4 text-center text-gray-700">
                       Camera access needed for QR scanning
                     </Text>
@@ -71,25 +88,20 @@ export default function HomeScreen() {
                     </Button>
                   </View>
                 ) : hasScanned ? (
-                  <View className="size-full items-center justify-center rounded-lg bg-gray-200">
+                  <View className="size-full items-center justify-center rounded-lg bg-gray-200" style={{ borderRadius: 24 }}>
                     <Text className="text-center text-gray-500">QR Code scanned! Redirecting...</Text>
                   </View>
                 ) : (
-                  <View className="size-full overflow-hidden rounded-lg">
-                    <CameraView
-                      style={{ width: '100%', height: '100%' }}
-                      facing="back"
-                      barcodeScannerSettings={{
-                        barcodeTypes: ['qr'],
-                      }}
-                      onBarcodeScanned={handleBarcodeScanned}
-                    />
-                  </View>
+                  <CameraView
+                    style={{ width: '100%', height: '100%', borderRadius: 24, overflow: 'hidden' }}
+                    facing="back"
+                    barcodeScannerSettings={{
+                      barcodeTypes: ['qr'],
+                    }}
+                    onBarcodeScanned={handleBarcodeScanned}
+                  />
                 )}
               </View>
-              <Text className="mt-2 text-center text-sm text-gray-600">
-                {hasScanned ? 'Redirecting to game...' : 'Point camera at QR code to scan'}
-              </Text>
             </View>
             {/* Input Section */}
             <View className="gap-2">

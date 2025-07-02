@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { View, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -43,38 +43,46 @@ export default function UsernameScreen() {
   }
 
   return (
-    <View className="flex-1 justify-center p-8">
-      <View className="gap-6">
-        <View className="items-center gap-2">
-          <Text className="text-center text-3xl font-bold">Welcome to Pao!</Text>
-          <Text className="text-center text-muted-foreground">
-            Enter your username to get started
-          </Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+      style={{ flex: 1 }}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="justify-center p-8">
+          <View className="gap-6">
+            <View className="items-center gap-2">
+              <Text className="text-center text-3xl font-bold">Welcome to Pao!</Text>
+              <Text className="text-center text-muted-foreground">
+                Enter your username to get started
+              </Text>
+            </View>
+            <View className="gap-4">
+              <Input
+                placeholder="Enter your username"
+                value={username}
+                onChangeText={setUsername}
+                maxLength={20}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <Button onPress={handleContinue} disabled={!isValidUsername(username) || isLoading}>
+                <Text className={!isValidUsername(username) ? 'text-muted-foreground' : ''}>
+                  {isLoading ? 'Saving...' : 'Continue'}
+                </Text>
+              </Button>
+              {username.trim().length > 0 && !isValidUsername(username) && (
+                <Text className="text-center text-sm text-red-500">
+                  Username must be between 2-20 characters
+                </Text>
+              )}
+            </View>
+          </View>
         </View>
-
-        <View className="gap-4">
-          <Input
-            placeholder="Enter your username"
-            value={username}
-            onChangeText={setUsername}
-            maxLength={20}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-
-          <Button onPress={handleContinue} disabled={!isValidUsername(username) || isLoading}>
-            <Text className={!isValidUsername(username) ? 'text-muted-foreground' : ''}>
-              {isLoading ? 'Saving...' : 'Continue'}
-            </Text>
-          </Button>
-
-          {username.trim().length > 0 && !isValidUsername(username) && (
-            <Text className="text-center text-sm text-red-500">
-              Username must be between 2-20 characters
-            </Text>
-          )}
-        </View>
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
