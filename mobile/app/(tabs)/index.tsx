@@ -1,7 +1,7 @@
 import { Platform, View } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import { useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useState, useEffect } from 'react';
+import { useRouter, useFocusEffect } from 'expo-router';
 
 import { ThemedText } from 'components/ThemedText';
 import { ThemedView } from 'components/ThemedView';
@@ -14,6 +14,12 @@ export default function HomeScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [hasScanned, setHasScanned] = useState(false);
   const router = useRouter();
+
+  // Reset QR scanning state when screen comes into focus
+  useFocusEffect(() => {
+    setHasScanned(false);
+    setGameCode('');
+  });
 
   function isValidGameCode(code: string): boolean {
     const trimmedCode = code.trim();

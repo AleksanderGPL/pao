@@ -9,6 +9,7 @@ import { ActiveGameScreen } from '@/components/screens/ActiveGame';
 import LobbyScreen from '@/components/screens/lobby';
 import { api } from '@/lib/axios';
 import { useLocalSearchParams } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface ApiResponse {
   id: number;
@@ -32,25 +33,39 @@ export interface ApiResponse {
 export default function GameScreen() {
   const [hasConnected, setHasConnected] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
+  const [currentUser, setCurrentUser] = useState<string>('');
   const params = useLocalSearchParams();
 
   const [gameInfo, setGameInfo] = useState<Omit<ApiResponse, 'players'> | null>(null);
   const [players, setPlayers] = useState<ApiResponse['players'] | null>(null);
   const [currentTarget, setCurrentTarget] = useState<number | null>(0);
 
+  // Get current user from AsyncStorage
   useEffect(() => {
-    api
-      .post<ApiResponse>(`/game/${params.gameCode}/join`)
-      .then((res) => {
-        setGameInfo(res.data);
-        setPlayers(res.data.players);
-        setHasConnected(true);
-      })
-      .catch((err) => {
-        if (err.response.status === 404) {
-          console.error('Game not found');
-        }
-      });
+    const getCurrentUser = async () => {
+      const username = await AsyncStorage.getItem('username');
+      if (username) {
+        setCurrentUser(username);
+      }
+    };
+    getCurrentUser();
+  }, []);
+
+  const fetchGameData = async () => {
+    try {
+      const res = await api.post<ApiResponse>(`/game/${params.gameCode}/join`);
+      setGameInfo(res.data);
+      setPlayers(res.data.players);
+      setHasConnected(true);
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        console.error('Game not found');
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchGameData();
   }, [params.gameCode]);
 
   if (!hasConnected) {
@@ -63,6 +78,8 @@ export default function GameScreen() {
         players={players!}
         gameCode={gameInfo!.code}
         onStartGame={() => setHasStarted(true)}
+        onRefresh={fetchGameData}
+        currentUser={currentUser}
       />
     );
   }
