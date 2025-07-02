@@ -1,4 +1,4 @@
-import LoadingScreen from '@/components/screens/Loading';
+import LoadingScreen from '@/components/screens/loading';
 import { Text } from '@/components/Text';
 import { Container } from '@/components/Container';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';

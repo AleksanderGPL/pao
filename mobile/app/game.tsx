@@ -1,4 +1,4 @@
-import LoadingScreen from '@/components/screens/Loading';
+import LoadingScreen from '@/components/screens/loading';
 import { Text } from '@/components/Text';
 import { Container } from '@/components/Container';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar';
 import { useEffect, useState } from 'react';
 import { View, ScrollView } from 'react-native';
 import { ActiveGameScreen } from '@/components/screens/ActiveGame';
-import LobbyScreen from '@/components/screens/Lobby';
+import LobbyScreen from '@/components/screens/lobby';
 import { api } from '@/lib/axios';
 import { useLocalSearchParams } from 'expo-router';
 
@@ -40,12 +40,12 @@ export default function GameScreen() {
   const [players, setPlayers] = useState<Player[]>([
     {
       username: 'Alex_Hunter',
-      profilePicture: 'https://i.pravatar.cc/150?img=1',
+      profilePicture: 'https://i.pravatar.cc/150?img=2',
       isAlive: true,
     },
     {
       username: 'SniperQueen',
-      profilePicture: 'https://i.pravatar.cc/150?img=2',
+      profilePicture: 'https://i.pravatar.cc/150?img=1',
       isAlive: true,
     },
     {

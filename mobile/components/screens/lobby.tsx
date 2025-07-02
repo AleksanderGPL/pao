@@ -1,13 +1,12 @@
-import LoadingScreen from '@/components/screens/Loading';
 import { Text } from '@/components/Text';
-import { Container } from '@/components/Container';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar';
-import { useEffect, useState } from 'react';
-import { View, ScrollView } from 'react-native';
+import { Avatar, AvatarImage } from '@/components/Avatar';
+import { useState } from 'react';
+import { View, ScrollView, Alert } from 'react-native';
 import { Player } from '@/app/game';
 import QRCodeStyled from 'react-native-qrcode-styled';
 import { Button } from '../Button';
+import * as Clipboard from 'expo-clipboard';
+import { Copy } from 'lucide-react-native';
 
 export default function LobbyScreen({
   players,
@@ -18,8 +17,17 @@ export default function LobbyScreen({
   gameCode: string;
   onStartGame: () => void;
 }) {
-  const [hasConnected, setHasConnected] = useState(false);
   const [showAllPlayers, setShowAllPlayers] = useState(false);
+
+  const copyGameCode = async () => {
+    try {
+      await Clipboard.setStringAsync(gameCode);
+      Alert.alert('Copied!', 'Game code copied to clipboard');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to copy game code');
+    }
+  };
+
   return (
     <>
       <ScrollView
@@ -28,12 +36,18 @@ export default function LobbyScreen({
         contentContainerClassName="p-5 flex-1 pb-0">
         <View className="h-[20rem]">
           <QRCodeStyled
-            data={'Simple QR Code'}
+            data={gameCode}
             style={{ backgroundColor: 'white' }}
             className="mb-5 aspect-square h-[20rem] w-full rounded-xl"
             padding={20}
             pieceSize={8}
           />
+          <Button variant="outline" onPress={copyGameCode} className="mt-2">
+            <View className="flex-row items-center justify-center gap-2">
+              <Text className="font-mono text-lg font-semibold">{gameCode}</Text>
+              <Copy size={18} className="text-muted-foreground" />
+            </View>
+          </Button>
         </View>
         <View className="gap-3">
           {(showAllPlayers ? players : players.slice(0, 3)).map((player) => (
