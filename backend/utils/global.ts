@@ -1,5 +1,6 @@
 const REQUIRED_ENVS = [
   "DB_URL",
+  "FRONTEND_URL",
 ];
 
 for (const env of REQUIRED_ENVS) {
@@ -9,3 +10,4 @@ for (const env of REQUIRED_ENVS) {
 }
 
 export const DB_URL = Deno.env.get("DB_URL")!;
+export const FRONTEND_URL = Deno.env.get("FRONTEND_URL")!;

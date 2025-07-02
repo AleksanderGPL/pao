@@ -11,6 +11,7 @@ import { useEffect } from 'react';
 export default function RootLayout() {
   const deviceColorScheme = useDeviceColorScheme();
 
+
   useEffect(() => {
     checkUserAuth();
   }, []);

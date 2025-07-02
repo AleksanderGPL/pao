@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Text } from '@/components/Text';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
+import { api } from '@/lib/axios';
 
 export default function UsernameScreen() {
   const [username, setUsername] = useState('');
@@ -23,7 +24,12 @@ export default function UsernameScreen() {
     setIsLoading(true);
     try {
       // Store username in AsyncStorage
+      const response = await api.post<{ sessionToken: string }>('/auth/register', {
+        name: username.trim(),
+      })
+      
       await AsyncStorage.setItem('username', username.trim());
+      await AsyncStorage.setItem('sessionToken', response.data.sessionToken);
 
       // Navigate to main app
       router.replace('/(tabs)');

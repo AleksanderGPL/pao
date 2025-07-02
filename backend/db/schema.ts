@@ -5,6 +5,7 @@ import {
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
 export const usersTable = pgTable("users", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -15,10 +16,20 @@ export const usersTable = pgTable("users", {
 
 export const userSessionsTable = pgTable("user_sessions", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  userId: integer().references(() => usersTable.id),
+  userId: integer().references(() => usersTable.id).notNull(),
   sessionToken: text().notNull(),
   createdAt: timestamp().notNull().defaultNow(),
 });
+
+export const userSessionsRelations = relations(
+  userSessionsTable,
+  ({ one }) => ({
+    user: one(usersTable, {
+      fields: [userSessionsTable.userId],
+      references: [usersTable.id],
+    }),
+  }),
+);
 
 export const lobbiesTable = pgTable("lobbies", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),

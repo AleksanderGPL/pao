@@ -4,8 +4,17 @@ import { z } from "zod";
 import { db } from "@/db/index.ts";
 import { userSessionsTable, usersTable } from "@/db/schema.ts";
 import { generateSessionToken } from "@/utils/generate.ts";
+import { authRequired } from "@/middleware/auth.ts";
 
 const app = new Hono();
+
+app.get("/", authRequired, (c) => {
+  const session = c.get("session");
+
+  return c.json({
+    name: session.user.name,
+  });
+});
 
 app.post(
   "/register",
@@ -22,7 +31,7 @@ app.post(
       userId: user.id,
     }).returning();
 
-    return c.json(sessionToken);
+    return c.json({ sessionToken });
   },
 );
 
