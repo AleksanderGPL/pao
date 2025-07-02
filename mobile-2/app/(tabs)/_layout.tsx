@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { HapticTab } from 'components/base/HapticTab';
 import TabBarBackground from 'components/ui/TabBarBackground';
@@ -64,8 +64,12 @@ export default function TabLayout() {
               // borderTopColor: colors.borderColor,
               borderTopWidth: 0,
               paddingHorizontal: 30,
+              borderRadius: 20,
+              marginHorizontal: 20,
+              marginBottom: 20,
             },
           }),
+
           tabBarIconStyle: {
             height: 60,
           },
