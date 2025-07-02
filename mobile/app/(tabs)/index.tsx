@@ -5,6 +5,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import React from 'react';
 import { ArrowLeft } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
+import { useUsernameStore } from '@/lib/username-store';
 
 import { ThemedText } from 'components/ThemedText';
 import { ThemedView } from 'components/ThemedView';
@@ -17,6 +18,7 @@ export default function HomeScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [hasScanned, setHasScanned] = useState(false);
   const router = useRouter();
+  const { username } = useUsernameStore();
 
   // Reset QR scanning state when screen comes into focus
   useFocusEffect(
@@ -63,7 +65,19 @@ export default function HomeScreen() {
           </View>
         </Button>
       </View>
-      <Text className="w-full pb-5 text-center text-3xl leading-[3rem]">Join a game</Text>
+      <View className="w-full items-center pb-6">
+        <Text className="text-4xl font-extrabold text-center leading-[3.2rem]">
+          {username ? `Welcome ` : 'Join a game'}
+          {username && (
+            <Text className="text-4xl font-extrabold">{username}!</Text>
+          )}
+        </Text>
+        <Text className="text-lg text-gray-500 text-center mt-2">
+          {username
+            ? 'Ready to play? Scan a code or enter one below to join a game.'
+            : 'Scan a QR code or enter a game code to get started.'}
+        </Text>
+      </View>
 
       <View>
         <View>
