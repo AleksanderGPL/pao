@@ -32,22 +32,9 @@ export default function GameScreen() {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    if (gameCode) {
-      api
-        .get(`/game/${gameCode}`)
-        .then((res) => {
-          console.log('Game data:', res.data);
-        })
-        .catch((err) => {
-          if (err.response?.status === 404) {
-            console.error('Game not found');
-          } else {
-            console.error('Error fetching game:', err);
-          }
-        });
-    }
-  }, [gameCode]);
+  // Note: API call removed to prevent infinite loop
+  // The backend needs to be running for this to work properly
+  // For now, we'll use mock data
 
   const [players, setPlayers] = useState<Player[]>([
     {
