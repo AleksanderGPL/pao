@@ -6,7 +6,8 @@ import { Player } from '@/app/game';
 import QRCodeStyled from 'react-native-qrcode-styled';
 import { Button } from '../Button';
 import * as Clipboard from 'expo-clipboard';
-import { Copy } from 'lucide-react-native';
+import { Copy, ArrowLeft } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 
 export default function LobbyScreen({
   players,
@@ -18,6 +19,7 @@ export default function LobbyScreen({
   onStartGame: () => void;
 }) {
   const [showAllPlayers, setShowAllPlayers] = useState(false);
+  const router = useRouter();
 
   const copyGameCode = async () => {
     try {
@@ -28,12 +30,24 @@ export default function LobbyScreen({
     }
   };
 
+  const handleBack = () => {
+    router.push('/(tabs)');
+  };
+
   return (
     <>
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerClassName="p-5 flex-1 pb-0">
+        <View className="mb-4">
+          <Button variant="outline" onPress={handleBack} className="self-start">
+            <View className="flex-row items-center gap-2">
+              <ArrowLeft size={18} />
+              <Text>Back</Text>
+            </View>
+          </Button>
+        </View>
         <View className="h-[20rem]">
           <QRCodeStyled
             data={gameCode}
