@@ -203,13 +203,18 @@ export default function LobbyScreen({
           </ScrollView>
         </View>
         
-        <View className="w-full flex-row justify-between pb-5">
-          <Button variant="outline" onPress={copyGameCode}>
-            <Text>Share</Text>
-          </Button>
-          <Button onPress={onStartGame}>
-            <Text>Start Game</Text>
-          </Button>
+        <View className="w-full pb-5">
+          {validPlayers.find(player => player.isHost && currentUser === player.user.name) ? (
+            <Button onPress={onStartGame} className="w-full">
+              <Text>Start Game</Text>
+            </Button>
+          ) : (
+            <View className="items-center">
+              <Text className="text-muted-foreground text-center">
+                Waiting for host to start the game...
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
     </>

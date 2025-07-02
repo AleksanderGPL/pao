@@ -22,6 +22,7 @@ export interface ApiResponse {
     {
       id: number;
       isAlive: boolean;
+      isHost: boolean;
       user: {
         name: string;
         profilePicture: string;

@@ -59,6 +59,7 @@ app.post(
           columns: {
             id: true,
             isAlive: true,
+            isHost: true,
           },
           with: {
             user: {
@@ -101,6 +102,7 @@ app.post(
         {
           id: player.id,
           isAlive: player.isAlive,
+          isHost: player.isHost,
           user: {
             name: session.user.name,
             profilePicture: session.user.profilePicture,
