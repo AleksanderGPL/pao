@@ -9,6 +9,37 @@ import { Player } from '@/app/game';
 import { Button } from '../Button';
 import { CameraView } from 'expo-camera';
 
+const TargetOverlay = ({
+  currentTarget,
+  players,
+}: {
+  currentTarget: string;
+  players: Player[];
+}) => (
+  <View className="absolute left-4 right-4 top-10">
+    <Card className="border-white/20 bg-black/70">
+      <CardContent className="p-3">
+        <View className="flex-row items-center space-x-3">
+          <Avatar className="h-10 w-10" alt={`${currentTarget} profile picture`}>
+            <AvatarImage
+              source={{
+                uri: players.find((p) => p.username === currentTarget)?.profilePicture,
+              }}
+            />
+            <AvatarFallback>
+              <Text className="text-sm font-semibold text-white">{currentTarget.charAt(0)}</Text>
+            </AvatarFallback>
+          </Avatar>
+          <View className="flex-1">
+            <Text className="font-semibold text-white">🎯 Target: {currentTarget}</Text>
+            <Text className="text-xs text-white/80">Find and eliminate this player</Text>
+          </View>
+        </View>
+      </CardContent>
+    </Card>
+  </View>
+);
+
 const ShootScreen = () => {
   return (
     <View className="flex-1 items-center justify-center">
@@ -81,6 +112,7 @@ export const ActiveGameScreen = ({
           className="h-full w-full"
           style={{ transform: [{ scaleX: -1 }] }}
         />
+        <TargetOverlay currentTarget={gameInfo.currentTarget} players={players} />
         <View className="absolute bottom-10 left-0 right-0 flex-row justify-center gap-4 px-4">
           <Button className="flex-1 bg-red-500" onPress={discardPhoto}>
             <Text>Discard</Text>
@@ -97,6 +129,9 @@ export const ActiveGameScreen = ({
     return (
       <View className="h-full w-full">
         <CameraView ref={cameraRef} facing={'front'} className="h-full w-full" />
+
+        <TargetOverlay currentTarget={gameInfo.currentTarget} players={players} />
+
         <View className="absolute bottom-10 left-0 right-0 flex-row justify-center gap-4 px-4">
           <Button
             className="flex-1 bg-red-500"
