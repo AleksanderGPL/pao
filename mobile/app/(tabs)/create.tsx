@@ -61,16 +61,6 @@ export default function CreateGameScreen() {
         </View>
 
         <View>
-          <Text className="mb-2 font-medium">Your Name</Text>
-          <Input
-            placeholder="Enter your name"
-            value={playerName}
-            onChangeText={setPlayerName}
-            className="mb-4"
-          />
-        </View>
-
-        <View>
           <Text className="mb-2 font-medium">Max Players</Text>
           <Input
             placeholder="Enter max players"

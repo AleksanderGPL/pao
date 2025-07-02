@@ -26,8 +26,8 @@ export default function UsernameScreen() {
       // Store username in AsyncStorage
       const response = await api.post<{ sessionToken: string }>('/auth/register', {
         name: username.trim(),
-      })
-      
+      });
+
       await AsyncStorage.setItem('username', username.trim());
       await AsyncStorage.setItem('sessionToken', response.data.sessionToken);
 
@@ -45,7 +45,7 @@ export default function UsernameScreen() {
       <View className="gap-6">
         <View className="items-center gap-2">
           <Text className="text-center text-3xl font-bold">Welcome to Pao!</Text>
-          <Text className="text-muted-foreground text-center">
+          <Text className="text-center text-muted-foreground">
             Enter your username to get started
           </Text>
         </View>
