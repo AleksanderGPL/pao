@@ -19,23 +19,35 @@ export type Player = {
 export default function GameScreen() {
   const [hasConnected, setHasConnected] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
-
-  api
-    .get(`/game/${useLocalSearchParams().gameCode}`)
-    .then((res) => {
-      console.log(res.data);
-    })
-    .catch((err) => {
-      if (err.response.status === 404) {
-        console.error('Game not found');
-      }
-    });
+  const [isLoading, setIsLoading] = useState(true);
+  const { gameCode } = useLocalSearchParams<{ gameCode: string }>();
 
   useEffect(() => {
-    setTimeout(() => {
+    // Simulate connection delay
+    const timer = setTimeout(() => {
       setHasConnected(true);
-    }, 1000);
+      setIsLoading(false);
+    }, 2000); // 2 seconds loading time
+
+    return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (gameCode) {
+      api
+        .get(`/game/${gameCode}`)
+        .then((res) => {
+          console.log('Game data:', res.data);
+        })
+        .catch((err) => {
+          if (err.response?.status === 404) {
+            console.error('Game not found');
+          } else {
+            console.error('Error fetching game:', err);
+          }
+        });
+    }
+  }, [gameCode]);
 
   const [players, setPlayers] = useState<Player[]>([
     {
@@ -69,8 +81,9 @@ export default function GameScreen() {
       isAlive: false,
     },
   ]);
+  
   const gameInfo = {
-    gameCode: 'SNQ-7K9M',
+    gameCode: gameCode || 'Unknown',
     maxPlayers: 8,
     currentTarget: 'SniperQueen',
     gameStatus: 'active',
@@ -80,7 +93,7 @@ export default function GameScreen() {
     endTime: new Date('2024-01-22T21:00:00Z'),
   };
 
-  if (!hasConnected) {
+  if (isLoading) {
     return <LoadingScreen />;
   }
 

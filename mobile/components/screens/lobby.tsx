@@ -38,11 +38,11 @@ export default function LobbyScreen({
           <QRCodeStyled
             data={gameCode}
             style={{ backgroundColor: 'white' }}
-            className="mb-5 aspect-square h-[20rem] w-full rounded-xl"
+            className="aspect-square h-[20rem] w-full rounded-xl"
             padding={20}
             pieceSize={8}
           />
-          <Button variant="outline" onPress={copyGameCode} className="mt-2">
+          <Button variant="outline" onPress={copyGameCode} className="mb-4">
             <View className="flex-row items-center justify-center gap-2">
               <Text className="font-mono text-lg font-semibold">{gameCode}</Text>
               <Copy size={18} className="text-muted-foreground" />
@@ -61,7 +61,7 @@ export default function LobbyScreen({
             </View>
           ))}
           <Button variant="outline" onPress={() => setShowAllPlayers(!showAllPlayers)}>
-            {showAllPlayers ? 'Show less' : 'Show all'}
+            <Text>{showAllPlayers ? 'Show less' : 'Show all'}</Text>
           </Button>
         </View>
         <View className="mb-2 flex-1" />
