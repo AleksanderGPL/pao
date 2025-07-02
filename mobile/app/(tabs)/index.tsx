@@ -1,75 +1,100 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, View } from 'react-native';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import { useState } from 'react';
+import { useRouter } from 'expo-router';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from 'components/ThemedText';
+import { ThemedView } from 'components/ThemedView';
+import { Button } from '@/components/Button';
+import { Text } from '@/components/Text';
+import { Input } from '@/components/Input';
 
 export default function HomeScreen() {
+  const [gameCode, setGameCode] = useState('');
+  const [permission, requestPermission] = useCameraPermissions();
+  const router = useRouter();
+
+  function isValidGameCode(code: string): boolean {
+    const trimmedCode = code.trim();
+    return trimmedCode.length === 8 && /^[A-Za-z]+$/.test(trimmedCode);
+  }
+
+  function handleJoinGame() {
+    router.push({
+      pathname: '/game',
+      params: { gameCode: gameCode.trim() },
+    });
+  }
+
+  function handleBarcodeScanned({ type, data }: { type: string; data: string }) {
+    console.log('QR Code scanned:', data);
+    setGameCode(data);
+    // Navigate to loading screen immediately after scanning
+
+    router.push({
+      pathname: '/game',
+      params: { gameCode: data.trim() },
+    });
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View className="h-full flex-1 p-5">
+      <Text className="w-full pb-5 text-center text-3xl leading-[3rem]">Join a game</Text>
+
+      <View>
+        <View>
+          <View className="gap-4">
+            {/* Camera View */}
+            <View>
+              <View className="aspect-square w-full items-center">
+                {!permission ? (
+                  <View className="size-full items-center justify-center rounded-lg bg-gray-200">
+                    <Text className="text-center text-gray-500">Loading camera...</Text>
+                  </View>
+                ) : !permission.granted ? (
+                  <View className="size-full items-center justify-center rounded-lg bg-gray-200 p-4">
+                    <Text className="mb-4 text-center text-gray-700">
+                      Camera access needed for QR scanning
+                    </Text>
+                    <Button onPress={requestPermission}>
+                      <Text>Grant Permission</Text>
+                    </Button>
+                  </View>
+                ) : (
+                  <View className="size-full overflow-hidden rounded-lg">
+                    <CameraView
+                      style={{ width: '100%', height: '100%' }}
+                      facing="back"
+                      barcodeScannerSettings={{
+                        barcodeTypes: ['qr'],
+                      }}
+                      onBarcodeScanned={handleBarcodeScanned}
+                    />
+                  </View>
+                )}
+              </View>
+              <Text className="mt-2 text-center text-sm text-gray-600">
+                Point camera at QR code to scan
+              </Text>
+            </View>
+            {/* Input Section */}
+            <View className="gap-2">
+              <Input
+                placeholder="Enter game code"
+                value={gameCode}
+                onChangeText={(text) => {
+                  setGameCode(text);
+                }}
+              />
+              <Button variant={'outline'} onPress={handleJoinGame}>
+                <Text className={!isValidGameCode(gameCode) ? 'text-muted-foreground' : ''}>
+                  Join Game
+                </Text>
+              </Button>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});

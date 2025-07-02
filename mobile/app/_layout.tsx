@@ -1,34 +1,41 @@
-import {
-	DarkTheme,
-	DefaultTheme,
-	ThemeProvider,
-} from "@react-navigation/native";
-import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import "react-native-reanimated";
-import "../global.css";
-
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useColorScheme as useDeviceColorScheme } from 'react-native';
+import 'react-native-reanimated';
+import '../global.css';
+import { ThemeProvider } from 'components/ThemeProvider';
+import { checkUserAuth } from '@/lib/auth';
+import { useEffect } from 'react';
 
 export default function RootLayout() {
-	const colorScheme = useColorScheme();
-	const [loaded] = useFonts({
-		SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-	});
+  const deviceColorScheme = useDeviceColorScheme();
 
-	if (!loaded) {
-		// Async font loading only occurs in development.
-		return null;
-	}
+  useEffect(() => {
+    checkUserAuth();
+  }, []);
 
-	return (
-		<ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-			<Stack>
-				<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-				<Stack.Screen name="+not-found" />
-			</Stack>
-			<StatusBar style="auto" />
-		</ThemeProvider>
-	);
+  return (
+    <ThemeProvider defaultTheme="system">
+      <Stack>
+        <Stack.Screen
+          name="username"
+          options={{
+            headerShown: false,
+            gestureEnabled: false,
+          }}
+        />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="game"
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+      <StatusBar style="auto" />
+    </ThemeProvider>
+  );
 }
