@@ -7,6 +7,7 @@ import { Container } from 'components/Container';
 import { Input } from 'components/Input';
 import { Button } from 'components/Button';
 import { Text } from 'components/Text';
+import { api } from '@/lib/axios';
 
 export default function CreateGameScreen() {
   const [gameName, setGameName] = useState('');
@@ -19,7 +20,7 @@ export default function CreateGameScreen() {
     setMaxPlayers(numericText);
   };
 
-  const handleCreateGame = () => {
+  const handleCreateGame = async () => {
     if (!gameName.trim()) {
       Alert.alert('Error', 'Please enter a game name');
       return;
@@ -33,10 +34,14 @@ export default function CreateGameScreen() {
       return;
     }
 
-    // TODO: Implement game creation logic
+    const res = await api.post<{ code: string }>('/game', {
+      name: gameName,
+      maxPlayers: Number(maxPlayers),
+    });
+
     Alert.alert(
       'Game Created!',
-      `Game: ${gameName}\nHost: ${playerName}\nMax Players: ${maxPlayers}`
+      `Game: ${gameName}\nHost: ${playerName}\nMax Players: ${maxPlayers}\nCode: ${res.data.code}`
     );
   };
 

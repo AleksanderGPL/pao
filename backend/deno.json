@@ -12,7 +12,8 @@
   "tasks": {
     "start": "deno run --allow-net --allow-env main.ts",
     "dev": "deno run --allow-net --allow-env --env-file=.env --watch main.ts",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "compilerOptions": {
     "jsx": "precompile",

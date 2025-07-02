@@ -16,7 +16,8 @@ export const usersTable = pgTable("users", {
 
 export const userSessionsTable = pgTable("user_sessions", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  userId: integer().references(() => usersTable.id).notNull(),
+  userId: integer().references(() => usersTable.id, { onDelete: "cascade" })
+    .notNull(),
   sessionToken: text().notNull(),
   createdAt: timestamp().notNull().defaultNow(),
 });
@@ -35,13 +36,15 @@ export const lobbiesTable = pgTable("lobbies", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   code: text().notNull(),
   name: text().notNull(),
+  maxPlayers: integer().notNull(),
   createdAt: timestamp().notNull().defaultNow(),
 });
 
 export const lobbyPlayersTable = pgTable("lobby_players", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  lobbyId: integer().references(() => lobbiesTable.id),
-  name: text().notNull(),
+  lobbyId: integer().references(() => lobbiesTable.id, { onDelete: "cascade" })
+    .notNull(),
+  userId: integer().references(() => usersTable.id, { onDelete: "cascade" }),
   isHost: boolean().notNull().default(false),
   createdAt: timestamp().notNull().defaultNow(),
 });
