@@ -3,7 +3,7 @@ import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { HapticTab } from 'components/base/HapticTab';
 import TabBarBackground from 'components/ui/TabBarBackground';
-import { Calendar, Feather, Plane, Home } from 'lucide-react-native';
+import { Calendar, Feather, Plane, Home, UserPlus, CirclePlus } from 'lucide-react-native';
 import { Icon } from 'components/base/LucideIcon';
 import { useTheme } from 'components/ThemeProvider';
 
@@ -82,8 +82,8 @@ export default function TabLayout() {
             tabBarIcon: ({ color, focused }) => (
               <Icon
                 size={25}
-                icon={Feather}
-                className={focused ? 'text-foreground/90' : 'text-foregroundMuted/70'}
+                icon={UserPlus}
+                className={focused ? 'text-foreground' : 'text-muted-foreground/70'}
               />
             ),
           }}
@@ -95,8 +95,8 @@ export default function TabLayout() {
             tabBarIcon: ({ color, focused }) => (
               <Icon
                 size={25}
-                icon={Home}
-                className={focused ? 'text-foreground/90' : 'text-foregroundMuted/70'}
+                icon={CirclePlus}
+                className={focused ? 'text-foreground' : 'text-muted-foreground/70'}
               />
             ),
           }}

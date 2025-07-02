@@ -5,8 +5,8 @@ import { ThemedView } from 'components/ThemedView';
 
 export default function HomeScreen() {
   return (
-    <View>
-      <ThemedText>Home</ThemedText>
+    <View className="p-10">
+      <ThemedText>Join</ThemedText>
     </View>
   );
 }
