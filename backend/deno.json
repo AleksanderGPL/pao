@@ -1,11 +1,13 @@
 {
   "imports": {
+    "@hono/zod-validator": "npm:@hono/zod-validator@^0.7.0",
     "@types/pg": "npm:@types/pg@^8.15.4",
     "drizzle-kit": "npm:drizzle-kit@^0.31.4",
     "drizzle-orm": "npm:drizzle-orm@^0.44.2",
-    "hono": "jsr:@hono/hono@^4.8.3",
+    "hono": "npm:hono@4.8.0",
     "pg": "npm:pg@^8.16.3",
-    "@/": "./"
+    "@/": "./",
+    "zod": "npm:zod@^3.25.67"
   },
   "tasks": {
     "start": "deno run --allow-net --allow-env main.ts",

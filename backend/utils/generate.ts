@@ -1,0 +1,18 @@
+import crypto from "node:crypto";
+import { db } from "@/db/index.ts";
+import { userSessionsTable } from "@/db/schema.ts";
+import { eq } from "drizzle-orm";
+
+export async function generateSessionToken() {
+  const token = crypto.randomBytes(32).toString("hex");
+
+  const existingToken = await db.query.userSessionsTable.findFirst({
+    where: eq(userSessionsTable.sessionToken, token),
+  });
+
+  if (existingToken) {
+    return generateSessionToken();
+  }
+
+  return token;
+}
