@@ -75,10 +75,21 @@ export default function GameScreen() {
 
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      if (message.type === 'player_join') {
-        if (!players?.some((player) => player.id === message.data.player.id)) {
-          setPlayers((prev) => [...(prev || []), message.data.player] as ApiResponse['players']);
-        }
+      switch (message.type) {
+        case 'player_join':
+          if (!players?.some((player) => player.id === message.data.player.id)) {
+            setPlayers((prev) => [...(prev || []), message.data.player] as ApiResponse['players']);
+          }
+          break;
+        case 'start_game':
+          setHasStarted(true);
+          break;
+        case 'player_target_assigned':
+          setCurrentTarget(message.data.targetId);
+          break;
+        default:
+          console.log('Unknown message type:', message.type);
+          break;
       }
     };
 
