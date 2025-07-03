@@ -76,10 +76,12 @@ app.post(
       return c.json({ error: "Game not found" }, 404);
     }
 
+    const session = c.get("session");
+
     const existingPlayer = await db.query.lobbyPlayersTable.findFirst({
       where: and(
         eq(lobbyPlayersTable.lobbyId, game.id),
-        eq(lobbyPlayersTable.userId, c.get("session").user.id),
+        eq(lobbyPlayersTable.userId, session.user.id),
       ),
     });
 
@@ -87,12 +89,25 @@ app.post(
       return c.json(game);
     }
 
-    await db.insert(lobbyPlayersTable).values({
+    const [player] = await db.insert(lobbyPlayersTable).values({
       lobbyId: game.id,
-      userId: c.get("session").user.id,
-    });
+      userId: session.user.id,
+    }).returning();
 
-    return c.json(game);
+    return c.json({
+      ...game,
+      players: [
+        ...game.players,
+        {
+          id: player.id,
+          isAlive: player.isAlive,
+          user: {
+            name: session.user.name,
+            profilePicture: session.user.profilePicture,
+          },
+        },
+      ],
+    });
   },
 );
 
