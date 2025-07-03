@@ -28,7 +28,7 @@ export default function LobbyScreen({
   const [showAllPlayers, setShowAllPlayers] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const router = useRouter();
-  
+
   // Auto-refresh every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
@@ -52,7 +52,7 @@ export default function LobbyScreen({
     // Navigate back to the main screen and reset QR scanning
     router.push('/(tabs)');
   };
-  
+
   // Don't render if players is null
   if (!players) {
     return <LoadingScreen />;
@@ -65,15 +65,14 @@ export default function LobbyScreen({
   }
 
   // Filter out any invalid player objects
-  const validPlayers = players.filter(player => player && player.user && player.user.name);
-  
+  const validPlayers = players.filter((player) => player && player.user && player.user.name);
+
   return (
     <>
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerClassName="p-5 flex-1 pb-0">
-        
         {/* Back Button */}
         <View className="mb-4">
           <Button variant="outline" onPress={handleBack} className="self-start">
@@ -83,7 +82,7 @@ export default function LobbyScreen({
             </View>
           </Button>
         </View>
-        
+
         <View className="h-[20rem]">
           <QRCodeStyled
             data={gameCode}
@@ -93,13 +92,13 @@ export default function LobbyScreen({
             pieceSize={8}
           />
         </View>
-        
+
         {/* Players List with Refresh */}
-        <View className="gap-3 mb-4">
+        <View className="mb-4 gap-3">
           <View className="flex-row items-center justify-between">
             <Text className="text-lg font-semibold">Players ({validPlayers.length})</Text>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onPress={handleRefresh}
               disabled={isRefreshing}
               className="flex-row items-center gap-2">
@@ -107,15 +106,15 @@ export default function LobbyScreen({
               <Text>{isRefreshing ? 'Refreshing...' : 'Refresh'}</Text>
             </Button>
           </View>
-          <ScrollView 
-            className="max-h-48" 
+          <ScrollView
+            className="max-h-48"
             showsVerticalScrollIndicator={true}
             nestedScrollEnabled={true}>
             <View className="gap-3">
               {validPlayers.map((player) => (
                 <View
                   key={player.user.name}
-                  className="flex-row items-center gap-3 rounded-2xl bg-card p-2 px-4">
+                  className="flex-row items-center gap-3 rounded-2xl bg-card p-3 px-4">
                   <Avatar className="h-12 w-12" alt={`${player.user.name} profile picture`}>
                     <AvatarImage source={{ uri: player.user.profilePicture }} />
                   </Avatar>
@@ -123,7 +122,7 @@ export default function LobbyScreen({
                     <Text className="text-lg font-semibold">
                       {player.user.name}
                       {currentUser === player.user.name && (
-                        <Text className="text-sm text-muted-foreground ml-2">(you)</Text>
+                        <Text className="ml-2 text-sm text-muted-foreground">(you)</Text>
                       )}
                     </Text>
                   </View>
@@ -132,7 +131,7 @@ export default function LobbyScreen({
             </View>
           </ScrollView>
         </View>
-        
+
         <View className="mb-2 flex-1" />
         <View className="w-full flex-row justify-between pb-5">
           <Button variant="outline" onPress={() => {}}>
