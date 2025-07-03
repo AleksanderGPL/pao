@@ -9,16 +9,19 @@ import { Button } from 'components/Button';
 import { Text } from 'components/Text';
 import { api } from '@/lib/axios';
 import { router } from 'expo-router';
+import { useUsernameStore } from '@/lib/username-store';
 
 export default function CreateGameScreen() {
   const [gameName, setGameName] = useState('');
   const [maxPlayers, setMaxPlayers] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
+  const { username } = useUsernameStore();
+
   const handleMaxPlayersChange = (text: string) => {
     // Only allow numeric characters
     const numericText = text.replace(/[^0-9]/g, '');
-    
+
     // Cap at 100 players
     const numValue = parseInt(numericText) || 0;
     if (numValue > 100) {
@@ -35,7 +38,12 @@ export default function CreateGameScreen() {
       return;
     }
 
-    if (!maxPlayers.trim() || isNaN(Number(maxPlayers)) || Number(maxPlayers) < 2 || Number(maxPlayers) > 100) {
+    if (
+      !maxPlayers.trim() ||
+      isNaN(Number(maxPlayers)) ||
+      Number(maxPlayers) < 2 ||
+      Number(maxPlayers) > 100
+    ) {
       Alert.alert('Error', 'Please enter a valid number of max players (2-100)');
       return;
     }
@@ -53,10 +61,10 @@ export default function CreateGameScreen() {
       });
     } catch (error: any) {
       console.error('Error creating game:', error);
-      
+
       if (error.response?.status === 401) {
         Alert.alert(
-          'Authentication Error', 
+          'Authentication Error',
           'You need to be logged in to create a game. Please restart the app and try again.',
           [
             {
@@ -64,8 +72,8 @@ export default function CreateGameScreen() {
               onPress: () => {
                 // Navigate to username screen to re-authenticate
                 router.push('/username');
-              }
-            }
+              },
+            },
           ]
         );
       } else if (error.response?.status === 400) {
@@ -86,7 +94,7 @@ export default function CreateGameScreen() {
         <View>
           <Text className="mb-2 font-medium">Game Name</Text>
           <Input
-            placeholder="Enter game name"
+            placeholder={`${username}'s game`}
             value={gameName}
             onChangeText={setGameName}
             className="mb-4"
