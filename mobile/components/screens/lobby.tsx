@@ -102,7 +102,9 @@ export default function LobbyScreen({
           }}>
           <QRCodeStyled
             data={gameCode}
-            className="size-full items-center justify-center bg-card p-4"
+            className="aspect-square h-[20rem] w-full w-full rounded-xl bg-card"
+            padding={20}
+            pieceSize={8}
             style={{
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 2 },
