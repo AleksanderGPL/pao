@@ -26,7 +26,7 @@ export default function RootLayout() {
             gestureEnabled: false,
           }}
         />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, gestureEnabled: true }} />
         <Stack.Screen
           name="game"
           options={{

@@ -3,8 +3,11 @@ import { PlatformPressable } from '@react-navigation/elements';
 import * as Haptics from 'expo-haptics';
 import { StyleSheet, Platform } from 'react-native';
 
-export function HapticTab(props: BottomTabBarButtonProps) {
+export type HapticTabProps = BottomTabBarButtonProps & { selectedBackgroundColor?: string };
+
+export function HapticTab(props: HapticTabProps) {
   const isSelected = props.accessibilityState?.selected;
+  const selectedBg = props.selectedBackgroundColor || '#EBE9FF';
 
   if (Platform.OS === 'web') {
     // On web, use className for background color
@@ -20,7 +23,10 @@ export function HapticTab(props: BottomTabBarButtonProps) {
   return (
     <PlatformPressable
       {...props}
-      style={[isSelected && styles.selectedTab, props.style]}
+      style={[
+        isSelected && { backgroundColor: selectedBg, borderRadius: 12, marginHorizontal: 4 },
+        props.style,
+      ]}
       android_ripple={{ color: 'rgba(0, 0, 0, 0.1)' }}
       onPressIn={(ev) => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

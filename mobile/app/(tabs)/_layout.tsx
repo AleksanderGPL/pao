@@ -41,6 +41,10 @@ export default function TabLayout() {
   //   })();
   // }, []);
 
+  const ThemedHapticTab = (props: import('components/base/HapticTab').HapticTabProps) => (
+    <HapticTab {...props} selectedBackgroundColor={colors.backgroundColor} />
+  );
+
   return (
     <>
       <Tabs
@@ -48,7 +52,7 @@ export default function TabLayout() {
           tabBarActiveTintColor: colors.activeTintColor,
           tabBarInactiveTintColor: colors.inactiveTintColor,
           headerShown: false,
-          tabBarButton: HapticTab,
+          tabBarButton: ThemedHapticTab,
           tabBarBackground: TabBarBackground,
 
           tabBarShowLabel: false,

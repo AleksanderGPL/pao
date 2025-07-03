@@ -5,6 +5,8 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import React from 'react';
 import { BlurView } from 'expo-blur';
 import { useUsernameStore } from '@/lib/username-store';
+import { QrCode } from 'lucide-react-native';
+import { Icon } from 'components/base/LucideIcon';
 
 import { ThemedText } from 'components/ThemedText';
 import { ThemedView } from 'components/ThemedView';
@@ -88,6 +90,12 @@ export default function HomeScreen() {
                 {/* Camera or fallback content goes here */}
               </BlurView>
               <ShadowView style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: 24, overflow: 'hidden' }}>
+                {/* QR Code Icon in top left when camera is active */}
+                {permission && permission.granted && !hasScanned && (
+                  <View style={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
+                    <Icon icon={QrCode} size={32} className="text-white/80" />
+                  </View>
+                )}
                 {!permission ? (
                   <View className="size-full bg-black items-center justify-center rounded-lg bg-gray-200" style={{ borderRadius: 24 }}>
                     <Text className="text-center text-gray-500">Loading camera...</Text>
