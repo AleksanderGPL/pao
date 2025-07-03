@@ -40,10 +40,6 @@ export default function HomeScreen() {
   }
 
   function handleJoinGame() {
-    if (!isValidGameCode(gameCode)) {
-      Alert.alert('Invalid Game Code', 'Please enter a valid game code');
-      return;
-    }
     router.push({
       pathname: '/game',
       params: { gameCode: gameCode.trim() },
@@ -52,11 +48,11 @@ export default function HomeScreen() {
 
   function handleBarcodeScanned({ type, data }: { type: string; data: string }) {
     if (hasScanned) return; // Prevent multiple scans
-    
+
     console.log('QR Code scanned:', data);
     setGameCode(data);
     setHasScanned(true); // Mark as scanned to prevent multiple scans
-    
+
     // Navigate to loading screen immediately after scanning
     router.push({
       pathname: '/game',
@@ -74,31 +70,30 @@ export default function HomeScreen() {
           maxWidth: isTablet ? undefined : 500,
           alignSelf: 'center',
           width: '100%',
-        }}
-      >
+        }}>
         {/* Back Button */}
         <View style={{ marginBottom: isSmallScreen ? 8 : 16 }}>
           <BackButton onPress={() => router.replace('/username')} />
         </View>
         <View className="w-full items-center pb-6">
           <Text
-            className="text-4xl font-extrabold text-center leading-[3.2rem]"
+            className="text-center text-4xl font-extrabold leading-[3.2rem]"
             style={{
               fontSize: isSmallScreen ? 28 : isTablet ? 40 : 32,
               lineHeight: isSmallScreen ? 36 : isTablet ? 48 : 40,
-            }}
-          >
+            }}>
             {username ? `Welcome ` : 'Join a game'}
             {username && (
-              <Text className="text-4xl font-extrabold" style={{ fontSize: isSmallScreen ? 28 : isTablet ? 40 : 32 }}>
+              <Text
+                className="text-4xl font-extrabold"
+                style={{ fontSize: isSmallScreen ? 28 : isTablet ? 40 : 32 }}>
                 {username}!
               </Text>
             )}
           </Text>
           <Text
-            className="text-lg text-gray-500 text-center mt-2"
-            style={{ fontSize: isSmallScreen ? 14 : isTablet ? 20 : 16 }}
-          >
+            className="mt-2 text-center text-lg text-gray-500"
+            style={{ fontSize: isSmallScreen ? 14 : isTablet ? 20 : 16 }}>
             {username
               ? 'Ready to play? Scan a code or enter one below to join a game.'
               : 'Scan a QR code or enter a game code to get started.'}
@@ -113,8 +108,7 @@ export default function HomeScreen() {
               alignItems: isTablet ? 'flex-start' : 'stretch',
               justifyContent: 'center',
               width: '100%',
-            }}
-          >
+            }}>
             {/* Camera View */}
             <View
               className="items-center"
@@ -126,16 +120,27 @@ export default function HomeScreen() {
                 aspectRatio: 3 / 4,
                 minHeight: isSmallScreen ? 180 : isTablet ? 400 : 260,
                 maxHeight: isTablet ? 420 : 340,
-              }}
-            >
+              }}>
               <BlurView
                 intensity={40}
                 tint="light"
-                style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: 24, overflow: 'hidden' }}
-              >
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 24,
+                  overflow: 'hidden',
+                }}>
                 {/* Camera or fallback content goes here */}
               </BlurView>
-              <ShadowView style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: 24, overflow: 'hidden' }}>
+              <ShadowView
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 24,
+                  overflow: 'hidden',
+                }}>
                 {/* QR Code Icon in top left when camera is active */}
                 {permission && permission.granted && !hasScanned && (
                   <View style={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
@@ -143,12 +148,22 @@ export default function HomeScreen() {
                   </View>
                 )}
                 {!permission ? (
-                  <View className="size-full bg-black items-center justify-center rounded-lg bg-gray-200" style={{ borderRadius: 24 }}>
-                    <Text className="text-center text-gray-500" style={{ fontSize: isSmallScreen ? 13 : 16 }}>Loading camera...</Text>
+                  <View
+                    className="size-full items-center justify-center rounded-lg bg-black bg-gray-200"
+                    style={{ borderRadius: 24 }}>
+                    <Text
+                      className="text-center text-gray-500"
+                      style={{ fontSize: isSmallScreen ? 13 : 16 }}>
+                      Loading camera...
+                    </Text>
                   </View>
                 ) : !permission.granted ? (
-                  <View className="size-full items-center justify-center rounded-lg bg-gray-200 p-4" style={{ borderRadius: 24 }}>
-                    <Text className="mb-4 text-center text-gray-700" style={{ fontSize: isSmallScreen ? 13 : 16 }}>
+                  <View
+                    className="size-full items-center justify-center rounded-lg bg-gray-200 p-4"
+                    style={{ borderRadius: 24 }}>
+                    <Text
+                      className="mb-4 text-center text-gray-700"
+                      style={{ fontSize: isSmallScreen ? 13 : 16 }}>
                       Camera access needed for QR scanning
                     </Text>
                     <Button onPress={requestPermission}>
@@ -156,8 +171,14 @@ export default function HomeScreen() {
                     </Button>
                   </View>
                 ) : hasScanned ? (
-                  <View className="size-full items-center justify-center rounded-lg bg-gray-200" style={{ borderRadius: 24 }}>
-                    <Text className="text-center text-gray-500" style={{ fontSize: isSmallScreen ? 13 : 16 }}>QR Code scanned! Redirecting...</Text>
+                  <View
+                    className="size-full items-center justify-center rounded-lg bg-gray-200"
+                    style={{ borderRadius: 24 }}>
+                    <Text
+                      className="text-center text-gray-500"
+                      style={{ fontSize: isSmallScreen ? 13 : 16 }}>
+                      QR Code scanned! Redirecting...
+                    </Text>
                   </View>
                 ) : (
                   <CameraView
@@ -182,18 +203,25 @@ export default function HomeScreen() {
                 maxWidth: 400,
                 alignSelf: isTablet ? 'flex-start' : 'center',
                 justifyContent: 'center',
-              }}
-            >
+              }}>
               <Input
                 placeholder="Enter game code"
                 value={gameCode}
                 onChangeText={(text) => {
                   setGameCode(text);
                 }}
-                style={{ fontSize: isSmallScreen ? 14 : 16, paddingVertical: isSmallScreen ? 8 : 12 }}
+                style={{
+                  fontSize: isSmallScreen ? 14 : 16,
+                  paddingVertical: isSmallScreen ? 8 : 12,
+                }}
               />
-              <Button variant={'outline'} onPress={handleJoinGame} style={{ paddingVertical: isSmallScreen ? 8 : 12 }}>
-                <Text className={!isValidGameCode(gameCode) ? 'text-muted-foreground' : ''} style={{ fontSize: isSmallScreen ? 14 : 16 }}>
+              <Button
+                variant={'outline'}
+                onPress={handleJoinGame}
+                style={{ paddingVertical: isSmallScreen ? 8 : 12 }}>
+                <Text
+                  className={!isValidGameCode(gameCode) ? 'text-muted-foreground' : ''}
+                  style={{ fontSize: isSmallScreen ? 14 : 16 }}>
                   Join Game
                 </Text>
               </Button>
