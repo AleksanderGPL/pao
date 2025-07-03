@@ -4,8 +4,10 @@ import { Container } from '@/components/Container';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar';
 import { useEffect, useState } from 'react';
-import { View, ScrollView } from 'react-native';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { Player } from '@/app/game';
+import { Button } from '../Button';
+import { CameraView } from 'expo-camera';
 
 export const ActiveGameScreen = ({
   players,
@@ -29,6 +31,16 @@ export const ActiveGameScreen = ({
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  const [isShooting, setIsShooting] = useState(false);
+
+  if (isShooting) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <CameraView facing={'front'} className="h-full w-full"></CameraView>
+      </View>
+    );
+  }
+
   return (
     <ScrollView
       className="flex-1"
@@ -44,6 +56,10 @@ export const ActiveGameScreen = ({
           </CardDescription>
         </CardHeader>
       </Card>
+
+      <Button className="mb-4" onPress={() => setIsShooting(true)}>
+        <Text>Shoot Target</Text>
+      </Button>
 
       {/* Current Target */}
       <Card className="mb-4">
