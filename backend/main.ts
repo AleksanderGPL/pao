@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import auth from "./services/auth.ts";
-import { FRONTEND_URL } from "./utils/global.ts";
+import { FRONTEND_URLS } from "./utils/global.ts";
 import { cors } from "hono/cors";
 import game from "./services/game/index.ts";
 import { generateLobbyCode } from "./utils/generate.ts";
@@ -11,7 +11,7 @@ const app = new Hono();
 registerWsHandler(app);
 
 app.use(cors({
-  origin: FRONTEND_URL,
+  origin: FRONTEND_URLS,
 }));
 
 app.get("/", (c) => {
