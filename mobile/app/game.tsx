@@ -20,13 +20,16 @@ export default function GameScreen() {
   const [hasConnected, setHasConnected] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
 
-  api.get(`/game/${useLocalSearchParams().gameCode}`).then((res) => {
-    console.log(res.data);
-  }).catch((err) => {
-    if (err.response.status === 404) {
-      console.error('Game not found');
-    }
-  });
+  api
+    .get(`/game/${useLocalSearchParams().gameCode}`)
+    .then((res) => {
+      console.log(res.data);
+    })
+    .catch((err) => {
+      if (err.response.status === 404) {
+        console.error('Game not found');
+      }
+    });
 
   useEffect(() => {
     setTimeout(() => {
