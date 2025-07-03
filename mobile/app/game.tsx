@@ -1,4 +1,4 @@
-import LoadingScreen from '@/components/screens/Loading';
+import LoadingScreen from '@/components/screens/loading';
 import { Text } from '@/components/Text';
 import { Container } from '@/components/Container';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar';
 import { useEffect, useState } from 'react';
 import { View, ScrollView } from 'react-native';
 import { ActiveGameScreen } from '@/components/screens/ActiveGame';
-import LobbyScreen from '@/components/screens/Lobby';
+import LobbyScreen from '@/components/screens/lobby';
 import { api } from '@/lib/axios';
 import { useLocalSearchParams } from 'expo-router';
 
@@ -19,33 +19,32 @@ export type Player = {
 export default function GameScreen() {
   const [hasConnected, setHasConnected] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
-
-  api
-    .get(`/game/${useLocalSearchParams().gameCode}`)
-    .then((res) => {
-      console.log(res.data);
-    })
-    .catch((err) => {
-      if (err.response.status === 404) {
-        console.error('Game not found');
-      }
-    });
+  const [isLoading, setIsLoading] = useState(true);
+  const { gameCode } = useLocalSearchParams<{ gameCode: string }>();
 
   useEffect(() => {
-    setTimeout(() => {
+    // Simulate connection delay
+    const timer = setTimeout(() => {
       setHasConnected(true);
-    }, 1000);
+      setIsLoading(false);
+    }, 2000); // 2 seconds loading time
+
+    return () => clearTimeout(timer);
   }, []);
+
+  // Note: API call removed to prevent infinite loop
+  // The backend needs to be running for this to work properly
+  // For now, we'll use mock data
 
   const [players, setPlayers] = useState<Player[]>([
     {
       username: 'Alex_Hunter',
-      profilePicture: 'https://i.pravatar.cc/150?img=1',
+      profilePicture: 'https://i.pravatar.cc/150?img=2',
       isAlive: true,
     },
     {
       username: 'SniperQueen',
-      profilePicture: 'https://i.pravatar.cc/150?img=2',
+      profilePicture: 'https://i.pravatar.cc/150?img=1',
       isAlive: true,
     },
     {
@@ -69,8 +68,9 @@ export default function GameScreen() {
       isAlive: false,
     },
   ]);
+  
   const gameInfo = {
-    gameCode: 'SNQ-7K9M',
+    gameCode: gameCode || 'Unknown',
     maxPlayers: 8,
     currentTarget: 'SniperQueen',
     gameStatus: 'active',
@@ -80,7 +80,7 @@ export default function GameScreen() {
     endTime: new Date('2024-01-22T21:00:00Z'),
   };
 
-  if (!hasConnected) {
+  if (isLoading) {
     return <LoadingScreen />;
   }
 
