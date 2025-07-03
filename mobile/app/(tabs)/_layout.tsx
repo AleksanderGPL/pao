@@ -101,11 +101,14 @@ export default function TabLayout() {
           options={{
             title: 'Create',
             tabBarIcon: ({ color, focused }) => (
+              <View className="items-center flex-row gap-2">
               <Icon
                 size={25}
                 icon={CirclePlus}
                 className={focused ? 'text-foreground' : 'text-muted-foreground/70'}
               />
+              <Text className="text-l">Create</Text>
+              </View>
             ),
           }}
         />
