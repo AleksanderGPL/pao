@@ -94,44 +94,23 @@ export default function LobbyScreen({
 
         {/* QR Code - Centered and Responsive */}
         <View
-          className="mb-6"
           style={{
-            height: qrSize + 40,
-            width: '100%',
-            position: 'relative',
+            width: qrSize,
+            height: qrSize,
+            borderRadius: 12,
+            padding: qrSize / 12,
           }}>
-          <View
+          <QRCodeStyled
+            data={gameCode}
+            className="size-full items-center justify-center bg-card p-4"
             style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: [{ translateX: -qrSize / 2 }, { translateY: -qrSize / 2 }],
-              width: qrSize,
-              height: qrSize,
-              backgroundColor: 'white',
-              borderRadius: 12,
-              padding: qrSize / 12,
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.1,
               shadowRadius: 4,
               elevation: 3,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <QRCodeStyled
-              data={gameCode}
-              style={{
-                backgroundColor: 'white',
-                width: qrSize - qrSize / 6,
-                height: qrSize - qrSize / 6,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-              padding={0}
-              pieceSize={(qrSize - qrSize / 6) / 25}
-            />
-          </View>
+            }}
+          />
         </View>
 
         {/* Copy Game Code Button */}
