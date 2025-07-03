@@ -109,7 +109,7 @@ app.post(
     redis.publish(
       `game:${game.code}`,
       JSON.stringify({
-        type: "player_joined",
+        type: "player_join",
         data: {
           player: newPlayer,
         },
@@ -169,6 +169,13 @@ app.post(
     await db.update(lobbiesTable).set({
       status: "active",
     }).where(eq(lobbiesTable.id, game.id));
+
+    redis.publish(
+      `game:${game.code}`,
+      JSON.stringify({
+        type: "start_game",
+      }),
+    );
 
     return c.json({ message: "Game started" });
   },
