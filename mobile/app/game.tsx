@@ -1,4 +1,4 @@
-import LoadingScreen from '@/components/screens/loading';
+import LoadingScreen from '@/components/screens/Loading';
 import { Text } from '@/components/Text';
 import { Container } from '@/components/Container';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
@@ -68,7 +68,7 @@ export default function GameScreen() {
       isAlive: false,
     },
   ]);
-  
+
   const gameInfo = {
     gameCode: gameCode || 'Unknown',
     maxPlayers: 8,
