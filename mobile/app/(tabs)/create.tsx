@@ -33,11 +33,6 @@ export default function CreateGameScreen() {
   };
 
   const handleCreateGame = async () => {
-    if (!gameName.trim()) {
-      Alert.alert('Error', 'Please enter a game name');
-      return;
-    }
-
     if (
       !maxPlayers.trim() ||
       isNaN(Number(maxPlayers)) ||
@@ -51,7 +46,7 @@ export default function CreateGameScreen() {
     setIsCreating(true);
     try {
       const res = await api.post<{ code: string }>('/game', {
-        name: gameName,
+        name: gameName.trim() ? gameName : `${username}'s game`,
         maxPlayers: Number(maxPlayers),
       });
 
