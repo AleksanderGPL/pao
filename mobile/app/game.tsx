@@ -10,6 +10,7 @@ import LobbyScreen from '@/components/screens/lobby';
 import { api } from '@/lib/axios';
 import { useLocalSearchParams } from 'expo-router';
 import { useUsernameStore } from '@/lib/username-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface ApiResponse {
   id: number;
@@ -35,6 +36,7 @@ export default function GameScreen() {
   const [hasConnected, setHasConnected] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [currentUser, setCurrentUser] = useState<string>('');
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
   const params = useLocalSearchParams();
   const { username, loadUsername } = useUsernameStore();
 
@@ -57,11 +59,28 @@ export default function GameScreen() {
   }, [username, loadUsername]);
 
   useEffect(() => {
-    const ws = new WebSocket(`${process.env.EXPO_PUBLIC_API_BASE}/api/game/${params.gameCode}/ws`);
-    ws.onmessage = (event) => {
-      console.log(event);
+    const getSessionToken = async () => {
+      const token = await AsyncStorage.getItem('sessionToken');
+      setSessionToken(token);
     };
+    getSessionToken();
   }, []);
+
+  useEffect(() => {
+    if (!sessionToken) return;
+
+    const ws = new WebSocket(
+      `${process.env.EXPO_PUBLIC_API_BASE}/api/game/${params.gameCode}/ws?token=${sessionToken}`
+    );
+
+    ws.onmessage = (event) => {
+      console.log(event.data);
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, [sessionToken, params.gameCode]);
 
   const fetchGameData = async () => {
     try {
