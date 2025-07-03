@@ -1,37 +1,31 @@
-import LoadingScreen from '@/components/screens/loading';
+import LoadingScreen from '@/components/screens/Loading';
 import { Text } from '@/components/Text';
 import { Container } from '@/components/Container';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar';
 import { useEffect, useState, useRef } from 'react';
 import { View, ScrollView, TouchableOpacity, Image, Modal } from 'react-native';
-import { Player } from '@/app/game';
 import { Button } from '../Button';
 import { CameraView } from 'expo-camera';
+import type { ApiResponse } from '@/app/game';
 
-const TargetOverlay = ({
-  currentTarget,
-  players,
-}: {
-  currentTarget: string;
-  players: Player[];
-}) => (
+const TargetOverlay = ({ player }: { player: ApiResponse['players'][number] }) => (
   <View className="absolute left-4 right-4 top-10">
     <Card className="border-white/20 bg-black/70">
       <CardContent className="p-3">
         <View className="flex-row items-center space-x-3">
-          <Avatar className="h-10 w-10" alt={`${currentTarget} profile picture`}>
+          <Avatar className="h-10 w-10" alt={`${player.user.name} profile picture`}>
             <AvatarImage
               source={{
-                uri: players.find((p) => p.username === currentTarget)?.profilePicture,
+                uri: player.user.profilePicture,
               }}
             />
             <AvatarFallback>
-              <Text className="text-sm font-semibold text-white">{currentTarget.charAt(0)}</Text>
+              <Text className="text-sm font-semibold text-white">{player.user.name.charAt(0)}</Text>
             </AvatarFallback>
           </Avatar>
           <View className="flex-1">
-            <Text className="font-semibold text-white">🎯 Target: {currentTarget}</Text>
+            <Text className="font-semibold text-white">🎯 Target: {player.user.name}</Text>
             <Text className="text-xs text-white/80">Find and eliminate this player</Text>
           </View>
         </View>
@@ -51,16 +45,11 @@ const ShootScreen = () => {
 export const ActiveGameScreen = ({
   players,
   gameInfo,
+  target,
 }: {
-  players: Player[];
-  gameInfo: {
-    gameCode: string;
-    gameStatus: string;
-    currentTarget: string;
-    maxPlayers: number;
-    timeRemaining: number;
-    eliminationsToday: number;
-  };
+  players: ApiResponse['players'];
+  target: number;
+  gameInfo: Omit<ApiResponse, 'players'>;
 }) => {
   const alivePlayers = players.filter((player) => player.isAlive);
   const eliminatedPlayers = players.filter((player) => !player.isAlive);
@@ -69,6 +58,8 @@ export const ActiveGameScreen = ({
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
+
+  const currentTarget = players.find((p) => p.id === target);
 
   const [isShooting, setIsShooting] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -112,7 +103,7 @@ export const ActiveGameScreen = ({
           className="h-full w-full"
           style={{ transform: [{ scaleX: -1 }] }}
         />
-        <TargetOverlay currentTarget={gameInfo.currentTarget} players={players} />
+        <TargetOverlay player={currentTarget!} />
         <View className="absolute bottom-10 left-0 right-0 flex-row justify-center gap-4 px-4">
           <Button className="flex-1 bg-red-500" onPress={discardPhoto}>
             <Text>Discard</Text>
@@ -130,7 +121,7 @@ export const ActiveGameScreen = ({
       <View className="h-full w-full">
         <CameraView ref={cameraRef} facing={'front'} className="h-full w-full" />
 
-        <TargetOverlay currentTarget={gameInfo.currentTarget} players={players} />
+        <TargetOverlay player={currentTarget!} />
 
         <View className="absolute bottom-10 left-0 right-0 flex-row justify-center gap-4 px-4">
           <Button
@@ -156,10 +147,10 @@ export const ActiveGameScreen = ({
         {/* Game Header */}
         <Card className="mb-4">
           <CardHeader>
-            <CardTitle>Game {gameInfo.gameCode}</CardTitle>
+            <CardTitle>Game {gameInfo.code}</CardTitle>
             <CardDescription>
-              {gameInfo.gameStatus === 'active' ? '🟢 Active' : '🔴 Inactive'} •{' '}
-              {alivePlayers.length} of {gameInfo.maxPlayers} players alive
+              {gameInfo.status === 'active' ? '🟢 Active' : '🔴 Inactive'} • {alivePlayers.length}{' '}
+              of {gameInfo.maxPlayers} players alive
             </CardDescription>
           </CardHeader>
         </Card>
@@ -175,18 +166,20 @@ export const ActiveGameScreen = ({
           </CardHeader>
           <CardContent>
             <View className="flex-row items-center space-x-3">
-              <Avatar className="h-12 w-12" alt={`${gameInfo.currentTarget} profile picture`}>
+              <Avatar className="h-12 w-12" alt={`${currentTarget?.user.name} profile picture`}>
                 <AvatarImage
                   source={{
-                    uri: players.find((p) => p.username === gameInfo.currentTarget)?.profilePicture,
+                    uri: currentTarget?.user.profilePicture,
                   }}
                 />
                 <AvatarFallback>
-                  <Text className="text-lg font-semibold">{gameInfo.currentTarget.charAt(0)}</Text>
+                  <Text className="text-lg font-semibold">
+                    {currentTarget?.user.name.charAt(0)}
+                  </Text>
                 </AvatarFallback>
               </Avatar>
               <View className="flex-1">
-                <Text className="text-lg font-semibold">{gameInfo.currentTarget}</Text>
+                <Text className="text-lg font-semibold">{currentTarget?.user.name}</Text>
                 <Text className="text-sm text-muted-foreground">
                   Find and eliminate this player
                 </Text>
@@ -203,8 +196,12 @@ export const ActiveGameScreen = ({
           <CardContent>
             <View className="space-y-2">
               <View className="flex-row justify-between">
+                <Text className="text-muted-foreground">Time Remaining</Text>
+                {/* <Text className="font-semibold">{formatTimeRemaining(gameInfo.timeRemaining)}</Text> */}
+              </View>
+              <View className="flex-row justify-between">
                 <Text className="text-muted-foreground">Eliminations</Text>
-                <Text className="font-semibold">{gameInfo.eliminationsToday}</Text>
+                {/* <Text className="font-semibold">{gameInfo.eliminationsToday}</Text> */}
               </View>
               <View className="flex-row justify-between">
                 <Text className="text-muted-foreground">Players Alive</Text>
@@ -225,17 +222,17 @@ export const ActiveGameScreen = ({
             <View className="space-y-3">
               {alivePlayers.map((player, index) => (
                 <View key={index} className="flex-row items-center space-x-3">
-                  <Avatar alt={`${player.username} profile picture`}>
-                    <AvatarImage source={{ uri: player.profilePicture }} />
+                  <Avatar alt={`${player.user.name} profile picture`}>
+                    <AvatarImage source={{ uri: player.user.profilePicture }} />
                     <AvatarFallback>
-                      <Text className="font-semibold">{player.username.charAt(0)}</Text>
+                      <Text className="font-semibold">{player.user.name.charAt(0)}</Text>
                     </AvatarFallback>
                   </Avatar>
                   <View className="flex-1">
-                    <Text className="font-medium">{player.username}</Text>
+                    <Text className="font-medium">{player.user.name}</Text>
                     <Text className="text-sm text-green-600">Active</Text>
                   </View>
-                  {player.username === gameInfo.currentTarget && (
+                  {player.id === target && (
                     <View className="rounded bg-red-100 px-2 py-1">
                       <Text className="text-xs font-medium text-red-700">TARGET</Text>
                     </View>
@@ -256,14 +253,14 @@ export const ActiveGameScreen = ({
               <View className="space-y-3">
                 {eliminatedPlayers.map((player, index) => (
                   <View key={index} className="flex-row items-center space-x-3 opacity-60">
-                    <Avatar alt={`${player.username} profile picture`}>
-                      <AvatarImage source={{ uri: player.profilePicture }} />
+                    <Avatar alt={`${player.user.name} profile picture`}>
+                      <AvatarImage source={{ uri: player.user.profilePicture }} />
                       <AvatarFallback>
-                        <Text className="font-semibold">{player.username.charAt(0)}</Text>
+                        <Text className="font-semibold">{player.user.name.charAt(0)}</Text>
                       </AvatarFallback>
                     </Avatar>
                     <View className="flex-1">
-                      <Text className="font-medium line-through">{player.username}</Text>
+                      <Text className="font-medium line-through">{player.user.name}</Text>
                       <Text className="text-sm text-red-600">Eliminated</Text>
                     </View>
                   </View>

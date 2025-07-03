@@ -1,4 +1,4 @@
-import LoadingScreen from '@/components/screens/loading';
+import LoadingScreen from '@/components/screens/Loading';
 import { Text } from '@/components/Text';
 import { Container } from '@/components/Container';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
@@ -10,89 +10,62 @@ import LobbyScreen from '@/components/screens/lobby';
 import { api } from '@/lib/axios';
 import { useLocalSearchParams } from 'expo-router';
 
-export type Player = {
-  username: string;
-  profilePicture: string;
-  isAlive: boolean;
-};
+export interface ApiResponse {
+  id: number;
+  code: string;
+  name: string;
+  maxPlayers: number;
+  status: 'inactive' | 'active' | 'finished';
+  createdAt: string;
+  players: [
+    {
+      id: number;
+      isAlive: boolean;
+      user: {
+        name: string;
+        profilePicture: string;
+      };
+    },
+  ];
+}
 
 export default function GameScreen() {
   const [hasConnected, setHasConnected] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const { gameCode } = useLocalSearchParams<{ gameCode: string }>();
+  const params = useLocalSearchParams();
+
+  const [gameInfo, setGameInfo] = useState<Omit<ApiResponse, 'players'> | null>(null);
+  const [players, setPlayers] = useState<ApiResponse['players'] | null>(null);
+  const [currentTarget, setCurrentTarget] = useState<number | null>(0);
 
   useEffect(() => {
-    // Simulate connection delay
-    const timer = setTimeout(() => {
-      setHasConnected(true);
-      setIsLoading(false);
-    }, 2000); // 2 seconds loading time
+    api
+      .post<ApiResponse>(`/game/${params.gameCode}/join`)
+      .then((res) => {
+        setGameInfo(res.data);
+        setPlayers(res.data.players);
+        setHasConnected(true);
+      })
+      .catch((err) => {
+        if (err.response.status === 404) {
+          console.error('Game not found');
+        }
+      });
+  }, [params.gameCode]);
 
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Note: API call removed to prevent infinite loop
-  // The backend needs to be running for this to work properly
-  // For now, we'll use mock data
-
-  const [players, setPlayers] = useState<Player[]>([
-    {
-      username: 'Alex_Hunter',
-      profilePicture: 'https://i.pravatar.cc/150?img=2',
-      isAlive: true,
-    },
-    {
-      username: 'SniperQueen',
-      profilePicture: 'https://i.pravatar.cc/150?img=1',
-      isAlive: true,
-    },
-    {
-      username: 'StealthMaster',
-      profilePicture: 'https://i.pravatar.cc/150?img=3',
-      isAlive: false,
-    },
-    {
-      username: 'NightCrawler',
-      profilePicture: 'https://i.pravatar.cc/150?img=4',
-      isAlive: true,
-    },
-    {
-      username: 'ShadowBlade',
-      profilePicture: 'https://i.pravatar.cc/150?img=5',
-      isAlive: true,
-    },
-    {
-      username: 'CyberNinja',
-      profilePicture: 'https://i.pravatar.cc/150?img=6',
-      isAlive: false,
-    },
-  ]);
-
-  const gameInfo = {
-    gameCode: gameCode || 'Unknown',
-    maxPlayers: 8,
-    currentTarget: 'SniperQueen',
-    gameStatus: 'active',
-    timeRemaining: 3600, // seconds
-    eliminationsToday: 2,
-    startTime: new Date('2024-01-15T09:00:00Z'),
-    endTime: new Date('2024-01-22T21:00:00Z'),
-  };
-
-  if (isLoading) {
+  if (!hasConnected) {
     return <LoadingScreen />;
   }
 
   if (!hasStarted) {
     return (
       <LobbyScreen
-        players={players}
-        gameCode={gameInfo.gameCode}
+        players={players!}
+        gameCode={gameInfo!.code}
         onStartGame={() => setHasStarted(true)}
       />
     );
   }
 
-  return <ActiveGameScreen players={players} gameInfo={gameInfo} />;
+  return <ActiveGameScreen players={players!} gameInfo={gameInfo!} target={currentTarget!} />;
 }

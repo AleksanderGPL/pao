@@ -1,81 +1,53 @@
+import LoadingScreen from '@/components/screens/Loading';
 import { Text } from '@/components/Text';
-import { Avatar, AvatarImage } from '@/components/Avatar';
-import { useState } from 'react';
-import { View, ScrollView, Alert } from 'react-native';
-import { Player } from '@/app/game';
+import { Container } from '@/components/Container';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar';
+import { useEffect, useState } from 'react';
+import { View, ScrollView } from 'react-native';
 import QRCodeStyled from 'react-native-qrcode-styled';
 import { Button } from '../Button';
-import * as Clipboard from 'expo-clipboard';
-import { Copy, ArrowLeft } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
+import { ApiResponse } from '@/app/game';
 
 export default function LobbyScreen({
   players,
   gameCode,
   onStartGame,
 }: {
-  players: Player[];
+  players: ApiResponse['players'];
   gameCode: string;
   onStartGame: () => void;
 }) {
+  const [hasConnected, setHasConnected] = useState(false);
   const [showAllPlayers, setShowAllPlayers] = useState(false);
-  const router = useRouter();
-
-  const copyGameCode = async () => {
-    try {
-      await Clipboard.setStringAsync(gameCode);
-      Alert.alert('Copied!', 'Game code copied to clipboard');
-    } catch (error) {
-      Alert.alert('Error', 'Failed to copy game code');
-    }
-  };
-
-  const handleBack = () => {
-    router.push('/(tabs)');
-  };
-
   return (
     <>
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerClassName="p-5 flex-1 pb-0">
-        <View className="mb-4">
-          <Button variant="outline" onPress={handleBack} className="self-start">
-            <View className="flex-row items-center gap-2">
-              <ArrowLeft size={18} />
-              <Text>Back</Text>
-            </View>
-          </Button>
-        </View>
         <View className="h-[20rem]">
           <QRCodeStyled
-            data={gameCode}
+            data={'Simple QR Code'}
             style={{ backgroundColor: 'white' }}
-            className="aspect-square h-[20rem] w-full rounded-xl"
+            className="mb-5 aspect-square h-[20rem] w-full rounded-xl"
             padding={20}
             pieceSize={8}
           />
-          <Button variant="outline" onPress={copyGameCode} className="mb-4">
-            <View className="flex-row items-center justify-center gap-2">
-              <Text className="font-mono text-lg font-semibold">{gameCode}</Text>
-              <Copy size={18} className="text-muted-foreground" />
-            </View>
-          </Button>
         </View>
         <View className="gap-3">
           {(showAllPlayers ? players : players.slice(0, 3)).map((player) => (
             <View
-              key={player.username}
+              key={player.user.name}
               className="flex-row items-center gap-3 rounded-2xl bg-card p-2 px-4">
-              <Avatar className="h-12 w-12" alt={`${player.username} profile picture`}>
-                <AvatarImage source={{ uri: player.profilePicture }} />
+              <Avatar className="h-12 w-12" alt={`${player.user.name} profile picture`}>
+                <AvatarImage source={{ uri: player.user.profilePicture }} />
               </Avatar>
-              <Text className="text-lg font-semibold">{player.username}</Text>
+              <Text className="text-lg font-semibold">{player.user.name}</Text>
             </View>
           ))}
           <Button variant="outline" onPress={() => setShowAllPlayers(!showAllPlayers)}>
-            <Text>{showAllPlayers ? 'Show less' : 'Show all'}</Text>
+            {showAllPlayers ? 'Show less' : 'Show all'}
           </Button>
         </View>
         <View className="mb-2 flex-1" />

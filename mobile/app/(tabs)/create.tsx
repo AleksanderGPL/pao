@@ -8,6 +8,7 @@ import { Input } from 'components/Input';
 import { Button } from 'components/Button';
 import { Text } from 'components/Text';
 import { api } from '@/lib/axios';
+import { router } from 'expo-router';
 
 export default function CreateGameScreen() {
   const [gameName, setGameName] = useState('');
@@ -35,10 +36,10 @@ export default function CreateGameScreen() {
       maxPlayers: Number(maxPlayers),
     });
 
-    Alert.alert(
-      'Game Created!',
-      `Game: ${gameName}\nMax Players: ${maxPlayers}\nCode: ${res.data.code}`
-    );
+    router.push({
+      pathname: '/game',
+      params: { gameCode: res.data.code },
+    });
   };
 
   return (

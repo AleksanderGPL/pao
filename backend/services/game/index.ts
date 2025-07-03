@@ -5,7 +5,7 @@ import { z } from "zod";
 import { db } from "@/db/index.ts";
 import { lobbiesTable, lobbyPlayersTable } from "@/db/schema.ts";
 import { generateLobbyCode } from "@/utils/generate.ts";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 const app = new Hono();
 
@@ -40,8 +40,8 @@ app.post(
   },
 );
 
-app.get(
-  "/:code",
+app.post(
+  "/:code/join",
   authRequired,
   zValidator(
     "param",
@@ -56,11 +56,15 @@ app.get(
       where: eq(lobbiesTable.code, code),
       with: {
         players: {
+          columns: {
+            id: true,
+            isAlive: true,
+          },
           with: {
             user: {
               columns: {
-                id: true,
                 name: true,
+                profilePicture: true,
               },
             },
           },
@@ -72,7 +76,23 @@ app.get(
       return c.json({ error: "Game not found" }, 404);
     }
 
-    return c.json({ game });
+    const existingPlayer = await db.query.lobbyPlayersTable.findFirst({
+      where: and(
+        eq(lobbyPlayersTable.lobbyId, game.id),
+        eq(lobbyPlayersTable.userId, c.get("session").user.id),
+      ),
+    });
+
+    if (existingPlayer) {
+      return c.json(game);
+    }
+
+    await db.insert(lobbyPlayersTable).values({
+      lobbyId: game.id,
+      userId: c.get("session").user.id,
+    });
+
+    return c.json(game);
   },
 );
 

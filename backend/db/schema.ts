@@ -1,15 +1,26 @@
 import {
   boolean,
   integer,
+  pgEnum,
   pgTable,
   text,
   timestamp,
+  unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+
+export const gameStatus = pgEnum("game_status", [
+  "inactive",
+  "active",
+  "finished",
+]);
 
 export const usersTable = pgTable("users", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: text().notNull(),
+  profilePicture: text().notNull().default(
+    "https://picsum.photos/id/11/500/500.jpg",
+  ),
   email: text().unique(),
   createdAt: timestamp().notNull().defaultNow(),
 });
@@ -37,6 +48,7 @@ export const lobbiesTable = pgTable("lobbies", {
   code: text().notNull(),
   name: text().notNull(),
   maxPlayers: integer().notNull(),
+  status: gameStatus().notNull().default("inactive"),
   createdAt: timestamp().notNull().defaultNow(),
 });
 
@@ -49,9 +61,12 @@ export const lobbyPlayersTable = pgTable("lobby_players", {
   lobbyId: integer().references(() => lobbiesTable.id, { onDelete: "cascade" })
     .notNull(),
   userId: integer().references(() => usersTable.id, { onDelete: "cascade" }),
+  isAlive: boolean().notNull().default(true),
   isHost: boolean().notNull().default(false),
   createdAt: timestamp().notNull().defaultNow(),
-});
+}, (t) => [
+  unique().on(t.lobbyId, t.userId),
+]);
 
 export const lobbyPlayersRelations = relations(
   lobbyPlayersTable,
