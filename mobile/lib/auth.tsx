@@ -16,6 +16,10 @@ export async function checkUserAuth() {
         if (res.data.name !== (await AsyncStorage.getItem('username'))) {
           await AsyncStorage.setItem('username', res.data.name);
         }
+      }).catch((err) => {
+        if (err.response.status === 401) {
+          router.replace('/username');
+        }
       });
 
       router.replace('/(tabs)');

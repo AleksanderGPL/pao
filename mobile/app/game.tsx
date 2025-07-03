@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import { View, ScrollView } from 'react-native';
 import { ActiveGameScreen } from '@/components/screens/ActiveGame';
 import LobbyScreen from '@/components/screens/Lobby';
+import { api } from '@/lib/axios';
+import { useLocalSearchParams } from 'expo-router';
 
 export type Player = {
   username: string;
@@ -17,6 +19,14 @@ export type Player = {
 export default function GameScreen() {
   const [hasConnected, setHasConnected] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
+
+  api.get(`/game/${useLocalSearchParams().gameCode}`).then((res) => {
+    console.log(res.data);
+  }).catch((err) => {
+    if (err.response.status === 404) {
+      console.error('Game not found');
+    }
+  });
 
   useEffect(() => {
     setTimeout(() => {
