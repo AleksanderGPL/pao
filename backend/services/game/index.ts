@@ -6,6 +6,7 @@ import { db } from "@/db/index.ts";
 import { lobbiesTable, lobbyPlayersTable } from "@/db/schema.ts";
 import { generateLobbyCode } from "@/utils/generate.ts";
 import { and, eq } from "drizzle-orm";
+import { redis } from "@/utils/redis.ts";
 
 const app = new Hono();
 
@@ -95,19 +96,31 @@ app.post(
       userId: session.user.id,
     }).returning();
 
+    const newPlayer = {
+      id: player.id,
+      isAlive: player.isAlive,
+      isHost: player.isHost,
+      user: {
+        name: session.user.name,
+        profilePicture: session.user.profilePicture,
+      },
+    };
+
+    redis.publish(
+      `game:${game.code}`,
+      JSON.stringify({
+        type: "player_joined",
+        data: {
+          player: newPlayer,
+        },
+      }),
+    );
+
     return c.json({
       ...game,
       players: [
         ...game.players,
-        {
-          id: player.id,
-          isAlive: player.isAlive,
-          isHost: player.isHost,
-          user: {
-            name: session.user.name,
-            profilePicture: session.user.profilePicture,
-          },
-        },
+        newPlayer,
       ],
     });
   },

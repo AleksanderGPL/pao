@@ -1,5 +1,13 @@
 import { upgradeWebSocket } from "hono/deno";
 import type { Hono } from "hono";
+import { redis } from "@/utils/redis.ts";
+
+const subscriber = await redis.duplicate();
+
+subscriber.psubscribe("game:*");
+subscriber.on("pmessage", (_, channel, message) => {
+  console.log(channel, JSON.parse(message));
+});
 
 export function registerWsHandler(app: Hono) {
   app.get(
