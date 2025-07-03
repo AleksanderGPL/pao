@@ -83,21 +83,13 @@ export default function LobbyScreen({
 
         {/* QR Code - Centered and Responsive */}
         <View
-          style={{
-            borderRadius: 12,
-          }}
-          className="items-center ">
+          className="items-center rounded-xl">
           <QRCodeStyled
             data={gameCode}
-            className="aspect-square h-[20rem] w-full rounded-xl bg-card"
+            className="aspect-square h-[20rem] w-full rounded-xl bg-card shadow-sm"
             padding={20}
             pieceSize={8}
             style={{
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-              elevation: 3,
               width: qrSize,
               height: qrSize,
             }}
@@ -105,22 +97,11 @@ export default function LobbyScreen({
         </View>
 
         {/* Copy Game Code Button */}
-        <View className="mb-4">
+        <View className="m-4">
           <Button
             variant="outline"
             onPress={copyGameCode}
-            className="w-full"
-            style={{
-              backgroundColor: 'white',
-              borderRadius: 12,
-              padding: 16,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-              elevation: 3,
-              borderWidth: 0,
-            }}>
+            className="w-full bg-white rounded-xl shadow-sm border-0">
             <View className="flex-row items-center justify-center gap-2">
               <Text className="font-mono text-lg font-semibold">{gameCode}</Text>
               <Copy size={18} className="text-muted-foreground" />
