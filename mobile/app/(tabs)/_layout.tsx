@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View, Text } from 'react-native';
 
 import { HapticTab } from 'components/base/HapticTab';
 import TabBarBackground from 'components/ui/TabBarBackground';
@@ -85,11 +85,14 @@ export default function TabLayout() {
           options={{
             title: 'Join',
             tabBarIcon: ({ color, focused }) => (
-              <Icon
-                size={25}
-                icon={UserPlus}
-                className={focused ? 'text-foreground' : 'text-muted-foreground/70'}
-              />
+              <View className="items-center flex-row gap-2">
+                <Icon
+                  size={25}
+                  icon={UserPlus}
+                  className={focused ? 'text-foreground' : 'text-muted-foreground/70'}
+                />
+                <Text className="text-l">Join</Text>
+              </View>
             ),
           }}
         />

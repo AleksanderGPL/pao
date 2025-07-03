@@ -12,6 +12,7 @@ import { useUsernameStore } from '@/lib/username-store';
 export default function UsernameScreen() {
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showError, setShowError] = useState(false);
   const router = useRouter();
   const { setUsername: setUsernameInStore } = useUsernameStore();
 
@@ -21,7 +22,11 @@ export default function UsernameScreen() {
   }
 
   async function handleContinue() {
-    if (!isValidUsername(username)) return;
+    if (!isValidUsername(username)) {
+      setShowError(true);
+      setTimeout(() => setShowError(false), 2000);
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -52,7 +57,7 @@ export default function UsernameScreen() {
         contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="justify-center p-8">
+        <View className="justify-center p-8 pt-8">
           <View className="gap-6">
             <View className="items-center gap-2">
               <Text className="text-center text-3xl font-bold">Welcome to Pao!</Text>
@@ -69,16 +74,23 @@ export default function UsernameScreen() {
                 autoCapitalize="none"
                 autoCorrect={false}
               />
-              <Button onPress={handleContinue} disabled={!isValidUsername(username) || isLoading}>
-                <Text className={!isValidUsername(username) ? 'text-muted-foreground' : ''}>
-                  {isLoading ? 'Saving...' : 'Continue'}
-                </Text>
-              </Button>
-              {username.trim().length > 0 && !isValidUsername(username) && (
-                <Text className="text-center text-sm text-red-500">
-                  Username must be between 2-20 characters
-                </Text>
-              )}
+              <View>
+                <Button className={!isValidUsername(username) ? 'bg-[#8459FF]' : 'bg-[#8459FF]'} onPress={handleContinue} disabled={isLoading}>
+                  <Text className={!isValidUsername(username) ? 'text-muted-foreground text-white' : ''}>
+                    {isLoading ? 'Saving...' : 'Continue'}
+                  </Text>
+                </Button>
+                {(showError || (username.trim().length > 0 && !isValidUsername(username)))
+                  ? (
+                    <Text className="text-center text-sm text-red-500">
+                      Username must be between 2-20 characters
+                    </Text>
+                  ) : (
+                    // empty space
+                    <View className="h-[20px]"></View>
+                  )
+                }
+              </View>
             </View>
           </View>
         </View>

@@ -62,7 +62,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <View className="h-full flex-1 p-5">
+    <View className="h-full flex-1 p-5 pt-8">
       {/* Back Button */}
       <View className="mb-4">
         <BackButton onPress={() => router.replace('/username')} />

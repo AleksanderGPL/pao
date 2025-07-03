@@ -86,7 +86,7 @@ export default function LobbyScreen({
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="p-5 flex-1 pb-0">
+        contentContainerClassName="p-5 flex-1 pb-0 pt-8">
         {/* Back Button */}
         <View className="mb-4">
           <BackButton onPress={handleBack} />

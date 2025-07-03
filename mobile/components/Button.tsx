@@ -70,7 +70,7 @@ const Button = forwardRef<ElementRef<typeof Pressable>, ButtonProps>(
         })}>
         <Pressable
           className={cn(
-            props.disabled && 'opacity-50 web:pointer-events-none',
+            props.disabled && 'web:pointer-events-none',
             buttonVariants({ variant, size, className })
           )}
           ref={ref}

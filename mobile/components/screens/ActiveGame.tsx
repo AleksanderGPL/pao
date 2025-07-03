@@ -143,7 +143,7 @@ export const ActiveGameScreen = ({
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="p-5">
+        contentContainerClassName="p-5 pt-8">
         {/* Game Header */}
         <Card className="mb-4">
           <CardHeader>
