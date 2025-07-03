@@ -13,11 +13,20 @@ import { router } from 'expo-router';
 export default function CreateGameScreen() {
   const [gameName, setGameName] = useState('');
   const [maxPlayers, setMaxPlayers] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
 
   const handleMaxPlayersChange = (text: string) => {
     // Only allow numeric characters
     const numericText = text.replace(/[^0-9]/g, '');
-    setMaxPlayers(numericText);
+    
+    // Cap at 100 players
+    const numValue = parseInt(numericText) || 0;
+    if (numValue > 100) {
+      Alert.alert('Maximum Players', 'Maximum players is capped at 100. Value has been adjusted.');
+      setMaxPlayers('100');
+    } else {
+      setMaxPlayers(numericText);
+    }
   };
 
   const handleCreateGame = async () => {
@@ -26,20 +35,47 @@ export default function CreateGameScreen() {
       return;
     }
 
-    if (!maxPlayers.trim() || isNaN(Number(maxPlayers)) || Number(maxPlayers) < 2) {
-      Alert.alert('Error', 'Please enter a valid number of max players (minimum 2)');
+    if (!maxPlayers.trim() || isNaN(Number(maxPlayers)) || Number(maxPlayers) < 2 || Number(maxPlayers) > 100) {
+      Alert.alert('Error', 'Please enter a valid number of max players (2-100)');
       return;
     }
 
-    const res = await api.post<{ code: string }>('/game', {
-      name: gameName,
-      maxPlayers: Number(maxPlayers),
-    });
+    setIsCreating(true);
+    try {
+      const res = await api.post<{ code: string }>('/game', {
+        name: gameName,
+        maxPlayers: Number(maxPlayers),
+      });
 
-    router.push({
-      pathname: '/game',
-      params: { gameCode: res.data.code },
-    });
+      router.push({
+        pathname: '/game',
+        params: { gameCode: res.data.code },
+      });
+    } catch (error: any) {
+      console.error('Error creating game:', error);
+      
+      if (error.response?.status === 401) {
+        Alert.alert(
+          'Authentication Error', 
+          'You need to be logged in to create a game. Please restart the app and try again.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                // Navigate to username screen to re-authenticate
+                router.push('/username');
+              }
+            }
+          ]
+        );
+      } else if (error.response?.status === 400) {
+        Alert.alert('Error', 'Invalid game data. Please check your input and try again.');
+      } else {
+        Alert.alert('Error', 'Failed to create game. Please try again later.');
+      }
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
@@ -60,7 +96,7 @@ export default function CreateGameScreen() {
         <View>
           <Text className="mb-2 font-medium">Max Players</Text>
           <Input
-            placeholder="Enter max players"
+            placeholder="Enter max players (2-100)"
             value={maxPlayers}
             onChangeText={handleMaxPlayersChange}
             keyboardType="numeric"
@@ -69,8 +105,8 @@ export default function CreateGameScreen() {
           />
         </View>
 
-        <Button onPress={handleCreateGame} className="mt-4">
-          <Text>Create Game</Text>
+        <Button onPress={handleCreateGame} disabled={isCreating} className="mt-4">
+          <Text>{isCreating ? 'Creating...' : 'Create Game'}</Text>
         </Button>
       </View>
     </Container>

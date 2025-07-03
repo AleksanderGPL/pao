@@ -4,12 +4,13 @@ import { Container } from '@/components/Container';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar';
 import { useEffect, useState } from 'react';
-import { View, ScrollView } from 'react-native';
+import { View, ScrollView, Dimensions, Alert } from 'react-native';
 import QRCodeStyled from 'react-native-qrcode-styled';
 import { Button } from '../Button';
 import { ApiResponse } from '@/app/game';
-import { RefreshCw, ArrowLeft } from 'lucide-react-native';
+import { RefreshCw, ArrowLeft, Copy } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import * as Clipboard from 'expo-clipboard';
 
 export default function LobbyScreen({
   players,
@@ -28,6 +29,10 @@ export default function LobbyScreen({
   const [showAllPlayers, setShowAllPlayers] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const router = useRouter();
+
+  // Get screen dimensions for responsive sizing
+  const { width: screenWidth } = Dimensions.get('window');
+  const qrSize = Math.min(screenWidth * 0.7, 280); // 70% of screen width, max 280px
 
   // Auto-refresh every 5 seconds
   useEffect(() => {
@@ -51,6 +56,15 @@ export default function LobbyScreen({
   const handleBack = () => {
     // Navigate back to the main screen and reset QR scanning
     router.push('/(tabs)');
+  };
+
+  const copyGameCode = async () => {
+    try {
+      await Clipboard.setStringAsync(gameCode);
+      Alert.alert('Copied!', 'Game code copied to clipboard');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to copy game code');
+    }
   };
 
   // Don't render if players is null
@@ -83,18 +97,74 @@ export default function LobbyScreen({
           </Button>
         </View>
 
-        <View className="h-[20rem]">
-          <QRCodeStyled
-            data={gameCode}
-            style={{ backgroundColor: 'white' }}
-            className="mb-5 aspect-square h-[20rem] w-full rounded-xl"
-            padding={20}
-            pieceSize={8}
-          />
+        {/* QR Code - Centered and Responsive */}
+        <View
+          className="mb-6"
+          style={{
+            height: qrSize + 40,
+            width: '100%',
+            position: 'relative',
+          }}>
+          <View
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: [{ translateX: -qrSize / 2 }, { translateY: -qrSize / 2 }],
+              width: qrSize,
+              height: qrSize,
+              backgroundColor: 'white',
+              borderRadius: 12,
+              padding: qrSize / 12,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              elevation: 3,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <QRCodeStyled
+              data={gameCode}
+              style={{
+                backgroundColor: 'white',
+                width: qrSize - qrSize / 6,
+                height: qrSize - qrSize / 6,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+              padding={0}
+              pieceSize={(qrSize - qrSize / 6) / 25}
+            />
+          </View>
+        </View>
+
+        {/* Copy Game Code Button */}
+        <View className="mb-4">
+          <Button
+            variant="outline"
+            onPress={copyGameCode}
+            className="w-full"
+            style={{
+              backgroundColor: 'white',
+              borderRadius: 12,
+              padding: 16,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              elevation: 3,
+              borderWidth: 0,
+            }}>
+            <View className="flex-row items-center justify-center gap-2">
+              <Text className="font-mono text-lg font-semibold">{gameCode}</Text>
+              <Copy size={18} className="text-muted-foreground" />
+            </View>
+          </Button>
         </View>
 
         {/* Players List with Refresh */}
-        <View className="mb-4 gap-3">
+        <View className="mb-4 flex-1 gap-3">
           <View className="flex-row items-center justify-between">
             <Text className="text-lg font-semibold">Players ({validPlayers.length})</Text>
             <Button
@@ -107,7 +177,7 @@ export default function LobbyScreen({
             </Button>
           </View>
           <ScrollView
-            className="max-h-48"
+            className="flex-1"
             showsVerticalScrollIndicator={true}
             nestedScrollEnabled={true}>
             <View className="gap-3">
@@ -132,14 +202,18 @@ export default function LobbyScreen({
           </ScrollView>
         </View>
 
-        <View className="mb-2 flex-1" />
-        <View className="w-full flex-row justify-between pb-5">
-          <Button variant="outline" onPress={() => {}}>
-            <Text>Share</Text>
-          </Button>
-          <Button onPress={onStartGame}>
-            <Text>Start Game</Text>
-          </Button>
+        <View className="w-full pb-5">
+          {validPlayers.find((player) => player.isHost && currentUser === player.user.name) ? (
+            <Button onPress={onStartGame} className="w-full">
+              <Text>Start Game</Text>
+            </Button>
+          ) : (
+            <View className="items-center">
+              <Text className="text-center text-muted-foreground">
+                Waiting for host to start the game...
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
     </>
