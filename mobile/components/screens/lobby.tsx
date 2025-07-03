@@ -33,7 +33,7 @@ export default function LobbyScreen({
 
   // Get screen dimensions for responsive sizing
   const { width: screenWidth } = Dimensions.get('window');
-  const qrSize = Math.min(screenWidth * 0.7, 280); // 70% of screen width, max 280px
+  const qrSize = Math.min(screenWidth - 40, 400); // 70% of screen width, max 280px
 
   const handleRefresh = async () => {
     if (onRefresh) {
@@ -84,14 +84,12 @@ export default function LobbyScreen({
         {/* QR Code - Centered and Responsive */}
         <View
           style={{
-            width: qrSize,
-            height: qrSize,
             borderRadius: 12,
-            padding: qrSize / 12,
-          }}>
+          }}
+          className="items-center ">
           <QRCodeStyled
             data={gameCode}
-            className="aspect-square h-[20rem] w-full w-full rounded-xl bg-card"
+            className="aspect-square h-[20rem] w-full rounded-xl bg-card"
             padding={20}
             pieceSize={8}
             style={{
@@ -100,6 +98,8 @@ export default function LobbyScreen({
               shadowOpacity: 0.1,
               shadowRadius: 4,
               elevation: 3,
+              width: qrSize,
+              height: qrSize,
             }}
           />
         </View>
