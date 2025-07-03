@@ -19,8 +19,8 @@ export function ShadowView({
   shadowColor = '#000',
   shadowOffset = { width: 0, height: 4 },
   shadowOpacity = 0.25,
-  shadowRadius = 16.5,
-  elevation = 8,
+  shadowRadius = 8,
+  elevation = 4,
   ...rest
 }: ShadowViewProps) {
   return (

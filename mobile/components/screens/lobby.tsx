@@ -12,6 +12,7 @@ import { RefreshCw, Copy } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import { BackButton } from '../base/BackButton';
+import { ShadowView } from '../base/ShadowView';
 
 export default function LobbyScreen({
   players,
@@ -84,29 +85,33 @@ export default function LobbyScreen({
         {/* QR Code - Centered and Responsive */}
         <View
           className="items-center rounded-xl">
-          <QRCodeStyled
-            data={gameCode}
-            className="aspect-square h-[20rem] w-full rounded-xl bg-card shadow-sm"
-            padding={20}
-            pieceSize={8}
-            style={{
-              width: qrSize,
-              height: qrSize,
-            }}
-          />
+          <ShadowView className="bg-white rounded-xl">
+            <QRCodeStyled
+              data={gameCode}
+              className="aspect-square h-[20rem] w-full rounded-xl"
+              padding={20}
+              pieceSize={8}
+              style={{
+                width: qrSize,
+                height: qrSize,
+              }}
+            />
+          </ShadowView>
         </View>
 
         {/* Copy Game Code Button */}
         <View className="m-4">
-          <Button
-            variant="outline"
-            onPress={copyGameCode}
-            className="w-full bg-white rounded-xl shadow-sm border-0">
-            <View className="flex-row items-center justify-center gap-2">
-              <Text className="font-mono text-lg font-semibold">{gameCode}</Text>
-              <Copy size={18} className="text-muted-foreground" />
-            </View>
-          </Button>
+          <ShadowView className="bg-white rounded-xl">
+            <Button
+              variant="outline"
+              onPress={copyGameCode}
+              className="w-full rounded-xl border-0">
+              <View className="flex-row items-center justify-center gap-2">
+                <Text className="font-mono text-lg font-semibold">{gameCode}</Text>
+                <Copy size={18} className="text-muted-foreground" />
+              </View>
+            </Button>
+          </ShadowView>
         </View>
 
         {/* Players List with Refresh */}
