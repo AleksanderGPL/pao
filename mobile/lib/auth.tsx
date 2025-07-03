@@ -4,10 +4,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View } from 'react-native';
 import { Text } from '@/components/Text';
 import { api } from './axios';
+import { useUsernameStore } from './username-store';
 
 export async function checkUserAuth(pathName: string) {
   try {
     const sessionToken = await AsyncStorage.getItem('sessionToken');
+    const { username, setUsername, loadUsername } = useUsernameStore.getState();
+
+    // Load username from AsyncStorage on first run
+    if (username === null) {
+      await loadUsername();
+    }
 
     if (sessionToken) {
       // User is authenticated, redirect to main app
@@ -15,8 +22,9 @@ export async function checkUserAuth(pathName: string) {
       api
         .get<{ name: string }>('/auth')
         .then(async (res) => {
-          if (res.data.name !== (await AsyncStorage.getItem('username'))) {
-            await AsyncStorage.setItem('username', res.data.name);
+          const currentUsername = useUsernameStore.getState().username;
+          if (res.data.name !== currentUsername) {
+            await setUsername(res.data.name);
           }
         })
         .catch((err) => {

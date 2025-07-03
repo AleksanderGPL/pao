@@ -9,7 +9,7 @@ import { ActiveGameScreen } from '@/components/screens/ActiveGame';
 import LobbyScreen from '@/components/screens/lobby';
 import { api } from '@/lib/axios';
 import { useLocalSearchParams } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUsernameStore } from '@/lib/username-store';
 
 export interface ApiResponse {
   id: number;
@@ -36,21 +36,25 @@ export default function GameScreen() {
   const [hasStarted, setHasStarted] = useState(false);
   const [currentUser, setCurrentUser] = useState<string>('');
   const params = useLocalSearchParams();
+  const { username, loadUsername } = useUsernameStore();
 
   const [gameInfo, setGameInfo] = useState<Omit<ApiResponse, 'players'> | null>(null);
   const [players, setPlayers] = useState<ApiResponse['players'] | null>(null);
   const [currentTarget, setCurrentTarget] = useState<number | null>(0);
 
-  // Get current user from AsyncStorage
+  // Get current user from Zustand store
   useEffect(() => {
     const getCurrentUser = async () => {
-      const username = await AsyncStorage.getItem('username');
-      if (username) {
-        setCurrentUser(username);
+      if (!username) {
+        await loadUsername();
+      }
+      const currentUsername = useUsernameStore.getState().username;
+      if (currentUsername) {
+        setCurrentUser(currentUsername);
       }
     };
     getCurrentUser();
-  }, []);
+  }, [username, loadUsername]);
 
   const fetchGameData = async () => {
     try {

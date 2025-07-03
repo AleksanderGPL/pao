@@ -7,11 +7,13 @@ import { Text } from '@/components/Text';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { api } from '@/lib/axios';
+import { useUsernameStore } from '@/lib/username-store';
 
 export default function UsernameScreen() {
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { setUsername: setUsernameInStore } = useUsernameStore();
 
   function isValidUsername(name: string): boolean {
     const trimmedName = name.trim();
@@ -23,12 +25,12 @@ export default function UsernameScreen() {
 
     setIsLoading(true);
     try {
-      // Store username in AsyncStorage
+      // Store username in both AsyncStorage and Zustand store
       const response = await api.post<{ sessionToken: string }>('/auth/register', {
         name: username.trim(),
       });
 
-      await AsyncStorage.setItem('username', username.trim());
+      await setUsernameInStore(username.trim());
       await AsyncStorage.setItem('sessionToken', response.data.sessionToken);
 
       // Navigate to main app
