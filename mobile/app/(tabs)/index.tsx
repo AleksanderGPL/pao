@@ -1,9 +1,8 @@
-import { Platform, View } from 'react-native';
+import { Alert, Platform, View } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useState, useEffect } from 'react';
 import { useRouter, useFocusEffect } from 'expo-router';
 import React from 'react';
-import { ArrowLeft } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import { useUsernameStore } from '@/lib/username-store';
 
@@ -12,6 +11,8 @@ import { ThemedView } from 'components/ThemedView';
 import { Button } from '@/components/Button';
 import { Text } from '@/components/Text';
 import { Input } from '@/components/Input';
+import { BackButton } from 'components/base/BackButton';
+import { ShadowView } from 'components/base/ShadowView';
 
 export default function HomeScreen() {
   const [gameCode, setGameCode] = useState('');
@@ -34,6 +35,10 @@ export default function HomeScreen() {
   }
 
   function handleJoinGame() {
+    if (!isValidGameCode(gameCode)) {
+      Alert.alert('Invalid Game Code', 'Please enter a valid game code');
+      return;
+    }
     router.push({
       pathname: '/game',
       params: { gameCode: gameCode.trim() },
@@ -58,12 +63,7 @@ export default function HomeScreen() {
     <View className="h-full flex-1 p-5">
       {/* Back Button */}
       <View className="mb-4">
-        <Button variant="outline" onPress={() => router.replace('/username')} className="self-start">
-          <View className="flex-row items-center gap-2">
-            <ArrowLeft size={18} />
-            <Text>Back</Text>
-          </View>
-        </Button>
+        <BackButton onPress={() => router.replace('/username')} />
       </View>
       <View className="w-full items-center pb-6">
         <Text className="text-4xl font-extrabold text-center leading-[3.2rem]">
@@ -87,9 +87,9 @@ export default function HomeScreen() {
               <BlurView intensity={40} tint="light" style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: 24, overflow: 'hidden' }}>
                 {/* Camera or fallback content goes here */}
               </BlurView>
-              <View style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: 24, overflow: 'hidden' }}>
+              <ShadowView style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: 24, overflow: 'hidden' }}>
                 {!permission ? (
-                  <View className="size-full items-center justify-center rounded-lg bg-gray-200" style={{ borderRadius: 24 }}>
+                  <View className="size-full bg-black items-center justify-center rounded-lg bg-gray-200" style={{ borderRadius: 24 }}>
                     <Text className="text-center text-gray-500">Loading camera...</Text>
                   </View>
                 ) : !permission.granted ? (
@@ -115,7 +115,7 @@ export default function HomeScreen() {
                     onBarcodeScanned={handleBarcodeScanned}
                   />
                 )}
-              </View>
+              </ShadowView>
             </View>
             {/* Input Section */}
             <View className="gap-2">

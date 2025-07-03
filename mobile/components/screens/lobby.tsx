@@ -8,9 +8,10 @@ import { View, ScrollView, Dimensions, Alert } from 'react-native';
 import QRCodeStyled from 'react-native-qrcode-styled';
 import { Button } from '../Button';
 import { ApiResponse } from '@/app/game';
-import { RefreshCw, ArrowLeft, Copy } from 'lucide-react-native';
+import { RefreshCw, Copy } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
+import { BackButton } from '../base/BackButton';
 
 export default function LobbyScreen({
   players,
@@ -54,7 +55,6 @@ export default function LobbyScreen({
   };
 
   const handleBack = () => {
-    // Navigate back to the main screen and reset QR scanning
     router.push('/(tabs)');
   };
 
@@ -89,12 +89,7 @@ export default function LobbyScreen({
         contentContainerClassName="p-5 flex-1 pb-0">
         {/* Back Button */}
         <View className="mb-4">
-          <Button variant="outline" onPress={handleBack} className="self-start">
-            <View className="flex-row items-center gap-2">
-              <ArrowLeft size={18} />
-              <Text>Back</Text>
-            </View>
-          </Button>
+          <BackButton onPress={handleBack} />
         </View>
 
         {/* QR Code - Centered and Responsive */}

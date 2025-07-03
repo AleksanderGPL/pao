@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Alert, View } from 'react-native';
+import { BackButton } from 'components/base/BackButton';
 
 import { ThemedText } from 'components/ThemedText';
 import { ThemedView } from 'components/ThemedView';
@@ -82,8 +83,16 @@ export default function CreateGameScreen() {
   };
 
   return (
-    <Container>
-      <Text className="mb-6 text-center text-2xl font-bold">Create New Game</Text>
+    <View className="h-full flex-1 p-5">
+      {/* Back Button */}
+      <View className="mb-4">
+        <BackButton onPress={() => router.replace('/username')} />
+      </View>
+      <View className="w-full items-center pb-6">
+        <Text className="text-4xl font-extrabold text-center leading-[3.2rem]">
+          Create New Game
+        </Text>
+      </View>
 
       <View className="space-y-2">
         <View>
@@ -112,6 +121,6 @@ export default function CreateGameScreen() {
           <Text>{isCreating ? 'Creating...' : 'Create Game'}</Text>
         </Button>
       </View>
-    </Container>
+    </View>
   );
 }
