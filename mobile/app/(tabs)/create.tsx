@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Alert } from 'react-native';
+import { Alert, View } from 'react-native';
 
 import { ThemedText } from 'components/ThemedText';
 import { ThemedView } from 'components/ThemedView';
@@ -11,7 +11,6 @@ import { api } from '@/lib/axios';
 
 export default function CreateGameScreen() {
   const [gameName, setGameName] = useState('');
-  const [playerName, setPlayerName] = useState('');
   const [maxPlayers, setMaxPlayers] = useState('');
 
   const handleMaxPlayersChange = (text: string) => {
@@ -25,10 +24,7 @@ export default function CreateGameScreen() {
       Alert.alert('Error', 'Please enter a game name');
       return;
     }
-    if (!playerName.trim()) {
-      Alert.alert('Error', 'Please enter your name');
-      return;
-    }
+
     if (!maxPlayers.trim() || isNaN(Number(maxPlayers)) || Number(maxPlayers) < 2) {
       Alert.alert('Error', 'Please enter a valid number of max players (minimum 2)');
       return;
@@ -41,7 +37,7 @@ export default function CreateGameScreen() {
 
     Alert.alert(
       'Game Created!',
-      `Game: ${gameName}\nHost: ${playerName}\nMax Players: ${maxPlayers}\nCode: ${res.data.code}`
+      `Game: ${gameName}\nMax Players: ${maxPlayers}\nCode: ${res.data.code}`
     );
   };
 
