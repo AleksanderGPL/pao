@@ -63,6 +63,7 @@ export const lobbyPlayersTable = pgTable("lobby_players", {
   userId: integer().references(() => usersTable.id, { onDelete: "cascade" }),
   isAlive: boolean().notNull().default(true),
   isHost: boolean().notNull().default(false),
+  targetId: integer(),
   createdAt: timestamp().notNull().defaultNow(),
 }, (t) => [
   unique().on(t.lobbyId, t.userId),
@@ -78,6 +79,10 @@ export const lobbyPlayersRelations = relations(
     lobby: one(lobbiesTable, {
       fields: [lobbyPlayersTable.lobbyId],
       references: [lobbiesTable.id],
+    }),
+    target: one(lobbyPlayersTable, {
+      fields: [lobbyPlayersTable.targetId],
+      references: [lobbyPlayersTable.id],
     }),
   }),
 );

@@ -7,6 +7,7 @@ import { lobbiesTable, lobbyPlayersTable } from "@/db/schema.ts";
 import { generateLobbyCode } from "@/utils/generate.ts";
 import { and, eq } from "drizzle-orm";
 import { redis } from "@/utils/redis.ts";
+import { assignRandomTargets } from "@/utils/assign-targets.ts";
 
 const app = new Hono();
 
@@ -165,6 +166,27 @@ app.post(
     ) {
       return c.json({ error: "You are not the host" }, 403);
     }
+
+    if (game.players.length < 2) {
+      return c.json(
+        { error: "At least 2 players are required to start the game" },
+        400,
+      );
+    }
+
+    const targetAssignments = await assignRandomTargets(game.id);
+
+    await Promise.all(
+      targetAssignments.map((assignment) => {
+        redis.publish(
+          `game:${game.code}`,
+          JSON.stringify({
+            type: "player_target_assigned",
+            data: assignment,
+          }),
+        );
+      }),
+    );
 
     await db.update(lobbiesTable).set({
       status: "active",

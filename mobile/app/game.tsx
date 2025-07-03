@@ -76,7 +76,9 @@ export default function GameScreen() {
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.type === 'player_join') {
-        setPlayers((prev) => [...(prev || []), message.data.player] as ApiResponse['players']);
+        if (!players?.some((player) => player.id === message.data.player.id)) {
+          setPlayers((prev) => [...(prev || []), message.data.player] as ApiResponse['players']);
+        }
       }
     };
 

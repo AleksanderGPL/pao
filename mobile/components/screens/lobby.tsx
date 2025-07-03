@@ -86,7 +86,7 @@ export default function LobbyScreen({
           className="items-center rounded-xl">
           <QRCodeStyled
             data={gameCode}
-            className="aspect-square h-[20rem] w-full rounded-xl bg-card shadow-sm"
+            className="aspect-square h-[20rem] w-full rounded-xl bg-card"
             padding={20}
             pieceSize={8}
             style={{

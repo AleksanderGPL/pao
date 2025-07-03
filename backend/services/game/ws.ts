@@ -5,24 +5,38 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import type { WSContext } from "hono/ws";
 import { db } from "@/db/index.ts";
-import { eq } from "drizzle-orm";
-import { userSessionsTable } from "@/db/schema.ts";
+import { and, eq } from "drizzle-orm";
+import {
+  lobbiesTable,
+  lobbyPlayersTable,
+  userSessionsTable,
+} from "@/db/schema.ts";
 
 const subscriber = redis.duplicate();
 subscriber.psubscribe("game:*");
 
-const retransmittableEvents = ["player_join", "start_game"];
+const retransmittableEvents = ["player_join", "start_game", "player_kill"];
 
 subscriber.on("pmessage", (_, channel, message) => {
   const data = JSON.parse(message);
 
-  if (retransmittableEvents.includes(data.type)) {
-    const gameCode = channel.split(":")[1];
+  const gameCode = channel.split(":")[1];
 
+  if (retransmittableEvents.includes(data.type)) {
     for (const [key, ws] of wsClients.entries()) {
       if (key.startsWith(gameCode)) {
         ws.send(JSON.stringify(data));
       }
+    }
+  } else if (data.type === "player_target_assigned") {
+    const ws = wsClients.get(`${gameCode}:${data.data.playerId}`);
+    if (ws) {
+      ws.send(JSON.stringify({
+        type: "player_target_assigned",
+        data: {
+          targetId: data.data.targetId,
+        },
+      }));
     }
   }
 });
@@ -60,7 +74,27 @@ export function registerWsHandler(app: Hono) {
             return;
           }
 
-          wsClients.set(`${c.req.param("code")}:${user?.userId}`, ws);
+          const gameCode = c.req.param("code");
+          const game = await db.query.lobbiesTable.findFirst({
+            where: eq(lobbiesTable.code, gameCode),
+          });
+
+          if (!game) {
+            ws.close();
+            return;
+          }
+
+          const player = await db.query.lobbyPlayersTable.findFirst({
+            where: and(
+              eq(lobbyPlayersTable.lobbyId, game?.id),
+              eq(lobbyPlayersTable.userId, user.user.id),
+            ),
+            with: {
+              user: true,
+            },
+          });
+
+          wsClients.set(`${gameCode}:${player?.id}`, ws);
         },
         onMessage(event) {
           console.log(`Message from client: ${event.data}`);
