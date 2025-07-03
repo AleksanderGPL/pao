@@ -74,7 +74,10 @@ export default function GameScreen() {
     );
 
     ws.onmessage = (event) => {
-      console.log(event.data);
+      const message = JSON.parse(event.data);
+      if (message.type === 'player_join') {
+        setPlayers((prev) => [...(prev || []), message.data.player] as ApiResponse['players']);
+      }
     };
 
     return () => {

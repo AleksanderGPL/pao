@@ -10,9 +10,13 @@ import { userSessionsTable } from "@/db/schema.ts";
 
 const subscriber = redis.duplicate();
 subscriber.psubscribe("game:*");
+
+const retransmittableEvents = ["player_join", "start_game"];
+
 subscriber.on("pmessage", (_, channel, message) => {
   const data = JSON.parse(message);
-  if (data.type === "player_joined") {
+
+  if (retransmittableEvents.includes(data.type)) {
     const gameCode = channel.split(":")[1];
 
     for (const [key, ws] of wsClients.entries()) {

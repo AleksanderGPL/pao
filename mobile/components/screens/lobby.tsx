@@ -35,17 +35,6 @@ export default function LobbyScreen({
   const { width: screenWidth } = Dimensions.get('window');
   const qrSize = Math.min(screenWidth * 0.7, 280); // 70% of screen width, max 280px
 
-  // Auto-refresh every 5 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (onRefresh) {
-        onRefresh();
-      }
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [onRefresh]);
-
   const handleRefresh = async () => {
     if (onRefresh) {
       setIsRefreshing(true);
