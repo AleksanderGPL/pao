@@ -56,6 +56,13 @@ export default function GameScreen() {
     getCurrentUser();
   }, [username, loadUsername]);
 
+  useEffect(() => {
+    const ws = new WebSocket(`${process.env.EXPO_PUBLIC_API_BASE}/api/game/${params.gameCode}/ws`);
+    ws.onmessage = (event) => {
+      console.log(event);
+    };
+  }, []);
+
   const fetchGameData = async () => {
     try {
       const res = await api.post<ApiResponse>(`/game/${params.gameCode}/join`);
@@ -67,6 +74,11 @@ export default function GameScreen() {
         console.error('Game not found');
       }
     }
+  };
+
+  const startGame = async () => {
+    await api.post(`/game/${params.gameCode}/start`);
+    setHasStarted(true);
   };
 
   useEffect(() => {
@@ -82,7 +94,7 @@ export default function GameScreen() {
       <LobbyScreen
         players={players!}
         gameCode={gameInfo!.code}
-        onStartGame={() => setHasStarted(true)}
+        onStartGame={startGame}
         onRefresh={fetchGameData}
         currentUser={currentUser}
       />
