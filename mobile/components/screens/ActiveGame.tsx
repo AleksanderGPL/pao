@@ -9,6 +9,14 @@ import { Player } from '@/app/game';
 import { Button } from '../Button';
 import { CameraView } from 'expo-camera';
 
+const ShootScreen = () => {
+  return (
+    <View className="flex-1 items-center justify-center">
+      <CameraView facing={'front'} className="h-full w-full" />
+    </View>
+  );
+};
+
 export const ActiveGameScreen = ({
   players,
   gameInfo,
@@ -34,11 +42,7 @@ export const ActiveGameScreen = ({
   const [isShooting, setIsShooting] = useState(false);
 
   if (isShooting) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <CameraView facing={'front'} className="h-full w-full"></CameraView>
-      </View>
-    );
+    return <CameraView facing={'front'} className="h-full w-full"></CameraView>;
   }
 
   return (
