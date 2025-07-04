@@ -111,7 +111,7 @@ export default function LobbyScreen({
         </View>
 
         {/* Players List with Refresh */}
-        <View className="mb-4 flex-1 gap-3">
+        <View className="mb-4 gap-3">
           <View className="flex-row items-center justify-between">
             <Text className="text-lg font-semibold">Players ({validPlayers.length})</Text>
             <Button
@@ -124,7 +124,7 @@ export default function LobbyScreen({
             </Button>
           </View>
           <View className="gap-3">
-            {validPlayers.map((player) => (
+            {(showAllPlayers ? validPlayers : validPlayers.slice(0, 3)).map((player) => (
               <View
                 key={player.user.name}
                 className="flex-row items-center gap-3 rounded-2xl bg-card p-3 px-4">
@@ -142,6 +142,16 @@ export default function LobbyScreen({
               </View>
             ))}
           </View>
+          {validPlayers.length > 3 && (
+            <Button
+              variant="outline"
+              onPress={() => setShowAllPlayers(!showAllPlayers)}
+              className="mt-3 w-full">
+              <Text>
+                {showAllPlayers ? 'Show Less' : `Show ${validPlayers.length - 3} More Players`}
+              </Text>
+            </Button>
+          )}
         </View>
         <View className="flex-1" />
         <View className="w-full pb-5">
