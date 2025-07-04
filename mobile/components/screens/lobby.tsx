@@ -83,11 +83,10 @@ export default function LobbyScreen({
         </View>
 
         {/* QR Code - Centered and Responsive */}
-        <View
-          className="items-center rounded-xl w-full max-w-[400px] self-center">
-          <ShadowView className="bg-white rounded-xl">
+        <View className="w-full max-w-[400px] items-center self-center rounded-xl">
+          <ShadowView className="rounded-xl bg-white">
             <QRCodeStyled
-              data={process.env.EXPO_PUBLIC_API_BASE+gameCode}
+              data={process.env.EXPO_PUBLIC_DEPLOY_LINK + gameCode}
               className="aspect-square h-[20rem] w-full rounded-xl"
               padding={20}
               pieceSize={8}
@@ -101,16 +100,13 @@ export default function LobbyScreen({
 
         {/* Copy Game Code Button */}
         <View className="m-4 w-full max-w-[400px] self-center">
-          <ShadowView className="bg-white rounded-xl">
-          <Button
-            variant="outline"
-            onPress={copyGameCode}
-              className="w-full rounded-xl border-0">
-            <View className="flex-row items-center justify-center gap-2">
-              <Text className="font-mono text-lg font-semibold">{gameCode}</Text>
-              <Copy size={18} className="text-muted-foreground" />
-            </View>
-          </Button>
+          <ShadowView className="rounded-xl bg-white">
+            <Button variant="outline" onPress={copyGameCode} className="w-full rounded-xl border-0">
+              <View className="flex-row items-center justify-center gap-2">
+                <Text className="font-mono text-lg font-semibold">{gameCode}</Text>
+                <Copy size={18} className="text-muted-foreground" />
+              </View>
+            </Button>
           </ShadowView>
         </View>
 
