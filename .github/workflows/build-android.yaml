@@ -3,8 +3,8 @@ name: Build Android
 on:
   push:
     paths:
-      - 'mobile/**'
-      - '.github/workflows/build-android.yml'
+      - "mobile/**"
+      - ".github/workflows/build-android.yaml"
 
 jobs:
   build:
@@ -12,69 +12,58 @@ jobs:
     defaults:
       run:
         working-directory: mobile
-    
+
     steps:
-    - name: 🏗 Checkout repository
-      uses: actions/checkout@v4
+      - name: 🏗 Checkout repository
+        uses: actions/checkout@v4
 
-    - name: 🏗 Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: 🏗 Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
 
-    - name: 🏗 Setup pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: 8
-        run_install: false
+      - name: 📦 Setup Bun cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('mobile/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
 
-    - name: 📦 Get pnpm store directory
-      shell: bash
-      run: |
-        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: 📦 Install dependencies
+        run: bun install
 
-    - name: 📦 Setup pnpm cache
-      uses: actions/cache@v4
-      with:
-        path: ${{ env.STORE_PATH }}
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('mobile/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-
+      - name: 🏗 Setup Expo CLI
+        run: npm install -g @expo/cli
 
-    - name: 📦 Install dependencies
-      run: pnpm install
+      - name: ☕ Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
 
-    - name: 🏗 Setup Expo CLI
-      run: npm install -g @expo/cli
+      - name: 🤖 Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-    - name: ☕ Setup Java JDK
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
+      - name: 🔨 Build Android APK
+        run: |
+          echo "🔨 Starting local Android build..."
 
-    - name: 🤖 Setup Android SDK
-      uses: android-actions/setup-android@v3
+          # Install dependencies and prebuild
+          bunx expo install --fix
+          bunx expo prebuild --platform android
 
-    - name: 🔨 Build Android APK
-      run: |
-        echo "🔨 Starting local Android build..."
-        
-        # Install dependencies and prebuild
-        npx expo install --fix
-        npx expo prebuild --platform android
-        
-        # Make gradlew executable
-        chmod +x android/gradlew
-        
-        # Build the APK
-        cd android
-        ./gradlew assembleRelease --no-daemon
-        
-        echo "✅ Local build completed"
+          # Make gradlew executable
+          chmod +x android/gradlew
 
-    - name: 📱 Upload APK Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: android-apk-${{ github.sha }}
-        path: mobile/android/app/build/outputs/apk/release/*.apk
+          # Build the APK
+          cd android
+          ./gradlew assembleRelease --no-daemon
+
+          echo "✅ Local build completed"
+
+      - name: 📱 Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-${{ github.sha }}
+          path: mobile/android/app/build/outputs/apk/release/*.apk
