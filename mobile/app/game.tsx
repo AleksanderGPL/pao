@@ -131,6 +131,7 @@ export default function GameScreen() {
       <LobbyScreen
         players={players!}
         gameCode={gameInfo!.code}
+        gameName={gameInfo!.name}
         onStartGame={startGame}
         onRefresh={fetchGameData}
         currentUser={currentUser}

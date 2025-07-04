@@ -8,7 +8,7 @@ import { View, ScrollView, Dimensions, Alert } from 'react-native';
 import QRCodeStyled from 'react-native-qrcode-styled';
 import { Button } from '../Button';
 import { ApiResponse } from '@/app/game';
-import { RefreshCw, Copy } from 'lucide-react-native';
+import { RefreshCw, Copy, Icon, ChevronLeft } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import { BackButton } from '../base/BackButton';
@@ -20,9 +20,11 @@ export default function LobbyScreen({
   onStartGame,
   onRefresh,
   currentUser,
+  gameName,
 }: {
   players: ApiResponse['players'] | null;
   gameCode: string;
+  gameName: string;
   onStartGame: () => void;
   onRefresh?: () => void;
   currentUser?: string;
@@ -78,13 +80,19 @@ export default function LobbyScreen({
         showsVerticalScrollIndicator={false}
         contentContainerClassName="p-5 pb-0 min-h-screen pt-8">
         {/* Back Button */}
-        <View className="mb-4">
-          <BackButton onPress={handleBack} />
+        <View className="mb-4 flex-row items-center justify-center gap-2">
+          <Button
+            onPress={handleBack}
+            variant="ghost"
+            className="absolute left-0 m-0 rounded-xl border-0 p-0">
+            <ChevronLeft size={25} className="text-muted-foreground" />
+          </Button>
+          <Text className="font-semibold">{gameName}</Text>
         </View>
 
         {/* QR Code - Centered and Responsive */}
         <View className="w-full max-w-[400px] items-center self-center rounded-xl">
-          <ShadowView className="rounded-xl bg-white">
+          <ShadowView className="items-center rounded-xl bg-white">
             <QRCodeStyled
               data={process.env.EXPO_PUBLIC_DEPLOY_LINK + '?gameCode=' + gameCode}
               className="aspect-square h-[20rem] w-full rounded-xl"
@@ -95,17 +103,14 @@ export default function LobbyScreen({
                 height: qrSize,
               }}
             />
-          </ShadowView>
-        </View>
-
-        {/* Copy Game Code Button */}
-        <View className="m-4 w-full max-w-[400px] self-center">
-          <ShadowView className="rounded-xl bg-white">
-            <Button variant="outline" onPress={copyGameCode} className="w-full rounded-xl border-0">
-              <View className="flex-row items-center justify-center gap-2">
-                <Text className="font-mono text-lg font-semibold">{gameCode}</Text>
-                <Copy size={18} className="text-muted-foreground" />
-              </View>
+            <Button
+              variant="outline"
+              onPress={copyGameCode}
+              className="flex-row items-center gap-2 rounded-xl border-0">
+              <Text className="font-mono text-lg font-semibold text-muted-foreground">
+                {gameCode}
+              </Text>
+              <Copy size={18} className="text-muted-foreground" />
             </Button>
           </ShadowView>
         </View>
