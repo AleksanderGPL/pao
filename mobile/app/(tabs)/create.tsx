@@ -89,7 +89,7 @@ export default function CreateGameScreen() {
         <BackButton onPress={() => router.replace('/username')} />
       </View>
       <View className="w-full items-center pb-6">
-        <Text className="text-4xl font-extrabold text-center leading-[3.2rem]">
+        <Text className="text-center text-4xl font-extrabold leading-[3.2rem]">
           Create New Game
         </Text>
       </View>

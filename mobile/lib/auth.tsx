@@ -6,8 +6,9 @@ import { Text } from '@/components/Text';
 import { api } from './axios';
 import { useUsernameStore } from './username-store';
 
-export async function checkUserAuth(pathName: string) {
+export async function checkUserAuth(pathName: string, searchParams: Record<string, string>) {
   try {
+    console.log(searchParams);
     const sessionToken = await AsyncStorage.getItem('sessionToken');
     const { username, setUsername, loadUsername } = useUsernameStore.getState();
 
@@ -29,7 +30,14 @@ export async function checkUserAuth(pathName: string) {
         })
         .catch((err) => {
           if (err.response.status === 401) {
-            router.replace('/username');
+            router.replace({
+              pathname: '/username',
+              params: {
+                redirect: encodeURIComponent(
+                  pathName + '?' + new URLSearchParams(searchParams).toString()
+                ),
+              },
+            });
           }
         });
 
@@ -38,7 +46,17 @@ export async function checkUserAuth(pathName: string) {
       }
     } else {
       // User is not authenticated, redirect to username screen
-      router.replace('/username');
+      router.replace({
+        pathname: '/username',
+        params:
+          pathName === '/username'
+            ? undefined
+            : {
+                redirect: encodeURIComponent(
+                  pathName + '?' + new URLSearchParams(searchParams).toString()
+                ),
+              },
+      });
     }
   } catch (error) {
     console.error('Error checking username:', error);

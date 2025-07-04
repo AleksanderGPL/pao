@@ -86,7 +86,7 @@ export default function LobbyScreen({
         <View className="w-full max-w-[400px] items-center self-center rounded-xl">
           <ShadowView className="rounded-xl bg-white">
             <QRCodeStyled
-              data={process.env.EXPO_PUBLIC_DEPLOY_LINK + gameCode}
+              data={process.env.EXPO_PUBLIC_DEPLOY_LINK + '?gameCode=' + gameCode}
               className="aspect-square h-[20rem] w-full rounded-xl"
               padding={20}
               pieceSize={8}

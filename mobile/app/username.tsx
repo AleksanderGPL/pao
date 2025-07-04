@@ -1,6 +1,6 @@
 import { View, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { Text } from '@/components/Text';
@@ -15,6 +15,7 @@ export default function UsernameScreen() {
   const [showError, setShowError] = useState(false);
   const router = useRouter();
   const { setUsername: setUsernameInStore } = useUsernameStore();
+  const { redirect } = useLocalSearchParams();
 
   function isValidUsername(name: string): boolean {
     const trimmedName = name.trim();
@@ -39,7 +40,13 @@ export default function UsernameScreen() {
       await AsyncStorage.setItem('sessionToken', response.data.sessionToken);
 
       // Navigate to main app
-      router.replace('/(tabs)');
+      if (redirect) {
+        router.replace({
+          pathname: decodeURIComponent(redirect as string),
+        });
+      } else {
+        router.replace('/(tabs)');
+      }
     } catch (error) {
       console.error('Error saving username:', error);
     } finally {
@@ -51,12 +58,10 @@ export default function UsernameScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
-      style={{ flex: 1 }}
-    >
+      style={{ flex: 1 }}>
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
-        keyboardShouldPersistTaps="handled"
-      >
+        keyboardShouldPersistTaps="handled">
         <View className="justify-center p-8 pt-8">
           <View className="gap-6">
             <View className="items-center gap-2">
@@ -75,21 +80,25 @@ export default function UsernameScreen() {
                 autoCorrect={false}
               />
               <View>
-                <Button className={!isValidUsername(username) ? 'bg-[#8459FF]' : 'bg-[#8459FF]'} onPress={handleContinue} disabled={isLoading}>
-                  <Text className={!isValidUsername(username) ? 'text-muted-foreground text-white' : ''}>
+                <Button
+                  className={!isValidUsername(username) ? 'bg-[#8459FF]' : 'bg-[#8459FF]'}
+                  onPress={handleContinue}
+                  disabled={isLoading}>
+                  <Text
+                    className={
+                      !isValidUsername(username) ? 'text-muted-foreground text-white' : ''
+                    }>
                     {isLoading ? 'Saving...' : 'Continue'}
                   </Text>
                 </Button>
-                {(showError || (username.trim().length > 0 && !isValidUsername(username)))
-                  ? (
-                    <Text className="text-center text-sm text-red-500">
-                      Username must be between 2-20 characters
-                    </Text>
-                  ) : (
-                    // empty space
-                    <View className="h-[20px]"></View>
-                  )
-                }
+                {showError || (username.trim().length > 0 && !isValidUsername(username)) ? (
+                  <Text className="text-center text-sm text-red-500">
+                    Username must be between 2-20 characters
+                  </Text>
+                ) : (
+                  // empty space
+                  <View className="h-[20px]"></View>
+                )}
               </View>
             </View>
           </View>

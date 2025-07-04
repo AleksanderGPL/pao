@@ -7,13 +7,15 @@ import '../global.css';
 import { ThemeProvider } from 'components/ThemeProvider';
 import { checkUserAuth } from '@/lib/auth';
 import { useEffect } from 'react';
+import { useGlobalSearchParams, useSearchParams } from 'expo-router/build/hooks';
 
 export default function RootLayout() {
   const deviceColorScheme = useDeviceColorScheme();
   const pathname = usePathname();
+  const searchParams = useGlobalSearchParams();
 
   useEffect(() => {
-    checkUserAuth(pathname);
+    checkUserAuth(pathname, searchParams as Record<string, string>);
   }, []);
 
   return (
