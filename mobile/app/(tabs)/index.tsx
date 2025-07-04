@@ -62,7 +62,7 @@ export default function HomeScreen() {
     let extractedGameCode = data;
 
     // Check if the scanned data is a URL from our deployed website
-    if (data.startsWith(process.env.EXPO_PUBLIC_DEPLOY_LINK?.toString() + '/game')) {
+    if (data.includes(process.env.EXPO_PUBLIC_DEPLOY_LINK?.toString()!)) {
       try {
         const url = new URL(data);
         const gameCodeParam = url.searchParams.get('gameCode');
