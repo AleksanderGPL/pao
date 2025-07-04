@@ -1,0 +1,69 @@
+name: Build Android
+
+on:
+  push:
+    paths:
+      - "mobile/**"
+      - ".github/workflows/build-android.yaml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+
+    steps:
+      - name: 🏗 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🏗 Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: 📦 Setup Bun cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('mobile/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: 📦 Install dependencies
+        run: bun install
+
+      - name: 🏗 Setup Expo CLI
+        run: npm install -g @expo/cli
+
+      - name: ☕ Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: 🤖 Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: 🔨 Build Android APK
+        run: |
+          echo "🔨 Starting local Android build..."
+
+          # Install dependencies and prebuild
+          bunx expo install --fix
+          bunx expo prebuild --platform android
+
+          # Make gradlew executable
+          chmod +x android/gradlew
+
+          # Build the APK
+          cd android
+          ./gradlew assembleRelease --no-daemon
+
+          echo "✅ Local build completed"
+
+      - name: 📱 Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-${{ github.sha }}
+          path: mobile/android/app/build/outputs/apk/release/*.apk
