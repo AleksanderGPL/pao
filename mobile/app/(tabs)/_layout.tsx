@@ -29,6 +29,8 @@ export default function TabLayout() {
     }
   };
 
+  
+
   const colors = getThemeColors();
   // useEffect(() => {
   //   (async () => {

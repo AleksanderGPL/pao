@@ -1,41 +1,32 @@
 import React from 'react';
-import { View, ViewProps, StyleProp, ViewStyle } from 'react-native';
+import { View, ViewProps } from 'react-native';
+import { cn } from '../../lib/utils';
 
 interface ShadowViewProps extends ViewProps {
   children: React.ReactNode;
-  style?: StyleProp<ViewStyle>;
   className?: string;
-  shadowColor?: string;
-  shadowOffset?: { width: number; height: number };
-  shadowOpacity?: number;
-  shadowRadius?: number;
-  elevation?: number;
+  shadowSize?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 
 export function ShadowView({
   children,
-  style,
   className,
-  shadowColor = '#000',
-  shadowOffset = { width: 0, height: 4 },
-  shadowOpacity = 0.25,
-  shadowRadius = 8,
-  elevation = 4,
+  shadowSize = 'md',
   ...rest
 }: ShadowViewProps) {
+  const shadowClasses = {
+    sm: 'shadow-sm',
+    md: 'shadow-md',
+    lg: 'shadow-lg',
+    xl: 'shadow-xl',
+    '2xl': 'shadow-2xl',
+  };
+
+  const baseClasses = shadowClasses[shadowSize];
+
   return (
     <View
-      style={[
-        {
-          shadowColor,
-          shadowOffset,
-          shadowOpacity,
-          shadowRadius,
-          elevation,
-        },
-        style,
-      ]}
-      className={className}
+      className={cn(baseClasses, className)}
       {...rest}
     >
       {children}
