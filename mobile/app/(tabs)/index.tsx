@@ -45,15 +45,33 @@ export default function HomeScreen() {
 
   function handleBarcodeScanned({ type, data }: { type: string; data: string }) {
     if (hasScanned) return; // Prevent multiple scans
-
+    
     console.log('QR Code scanned:', data);
-    setGameCode(data);
+    
+    let extractedGameCode = data;
+    
+    // Check if the scanned data is a URL from our deployed website
+    if (data.startsWith('https://pao.aleksander.cc/game')) {
+      try {
+        const url = new URL(data);
+        const gameCodeParam = url.searchParams.get('gameCode');
+        if (gameCodeParam) {
+          extractedGameCode = gameCodeParam;
+          console.log('Extracted game code from URL:', extractedGameCode);
+        }
+      } catch (error) {
+        extractedGameCode = data;
+        console.error('Error parsing URL:', error);
+      }
+    }
+    
+    setGameCode(extractedGameCode);
     setHasScanned(true); // Mark as scanned to prevent multiple scans
-
+    
     // Navigate to loading screen immediately after scanning
     router.push({
       pathname: '/game',
-      params: { gameCode: data.trim() },
+      params: { gameCode: extractedGameCode.trim() },
     });
   }
 
@@ -64,31 +82,31 @@ export default function HomeScreen() {
         style={{
           paddingTop: Platform.OS === 'android' ? 32 : 24,
         }}>
-        {/* Back Button */}
+      {/* Back Button */}
         <View className="mb-2 sm:mb-4">
-          <BackButton onPress={() => router.replace('/username')} />
-        </View>
-        <View className="w-full items-center pb-6">
+        <BackButton onPress={() => router.replace('/username')} />
+      </View>
+      <View className="w-full items-center pb-6">
           <Text
             className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-extrabold text-center leading-tight sm:leading-snug lg:leading-normal xl:leading-relaxed"
           >
-            {username ? `Welcome ` : 'Join a game'}
-            {username && (
+          {username ? `Welcome ` : 'Join a game'}
+          {username && (
               <Text className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-extrabold">
                 {username}!
               </Text>
-            )}
-          </Text>
+          )}
+        </Text>
           <Text
             className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-500 text-center mt-2"
           >
-            {username
-              ? 'Ready to play? Scan a code or enter one below to join a game.'
-              : 'Scan a QR code or enter a game code to get started.'}
-          </Text>
-        </View>
+          {username
+            ? 'Ready to play? Scan a code or enter one below to join a game.'
+            : 'Scan a QR code or enter a game code to get started.'}
+        </Text>
+      </View>
 
-        <View>
+      <View>
           <View
             className="flex flex-col lg:flex-row gap-4 lg:gap-8 items-stretch lg:items-start justify-center w-full"
           >

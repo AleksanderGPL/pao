@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { View, Platform } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
 import { Button, buttonVariants } from '../Button';
 import { Text } from '../Text';
@@ -12,7 +12,7 @@ interface BackButtonProps {
   variant?: VariantProps<typeof buttonVariants>["variant"];
 }
 
-export function BackButton({ onPress, children = 'Back', className = 'self-start mt-4', variant = 'outline' }: BackButtonProps) {
+export function BackButton({ onPress, children = 'Back', className = `self-start ${Platform.OS === 'android' ? 'mt-4' : ''}`, variant = 'outline' }: BackButtonProps) {
   return (
     <Button variant={variant} onPress={onPress} className={className}>
       <View className="flex-row items-center gap-2">
