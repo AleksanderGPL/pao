@@ -8,6 +8,8 @@ import { generateLobbyCode } from "@/utils/generate.ts";
 import { and, eq } from "drizzle-orm";
 import { redis } from "@/utils/redis.ts";
 import { assignRandomTargets } from "@/utils/assign-targets.ts";
+import { uploadFileBuffer } from "@/utils/s3.ts";
+import sharp from "sharp";
 
 const app = new Hono();
 
@@ -200,6 +202,102 @@ app.post(
     );
 
     return c.json({ message: "Game started" });
+  },
+);
+
+app.post(
+  "/:code/player/:playerId/shoot",
+  authRequired,
+  zValidator(
+    "param",
+    z.object({
+      code: z.string().min(1).max(8),
+      playerId: z.coerce.number(),
+    }),
+  ),
+  zValidator(
+    "form",
+    z.object({
+      image: z.instanceof(File)
+        .refine(
+          (file) => file.size > 0,
+          "Uploaded image cannot be empty.",
+        )
+        .refine((file) => file.size <= 1024 * 1024 * 5, {
+          message: "Image must be less than 5MB",
+        }).refine((file) => file.type.startsWith("image/"), {
+          message: "Image must be an image",
+        }),
+    }),
+  ),
+  async (c) => {
+    const { code, playerId } = c.req.valid("param");
+    const { image } = c.req.valid("form");
+
+    const game = await db.query.lobbiesTable.findFirst({
+      where: eq(lobbiesTable.code, code),
+    });
+
+    if (!game) {
+      return c.json({ error: "Game not found" }, 404);
+    }
+
+    const initiatingPlayer = await db.query.lobbyPlayersTable.findFirst({
+      where: and(
+        eq(lobbyPlayersTable.lobbyId, game.id),
+        eq(lobbyPlayersTable.userId, c.get("session").user.id),
+      ),
+    });
+
+    if (!initiatingPlayer) {
+      return c.json({ error: "You are not in this game" }, 403);
+    }
+
+    if (initiatingPlayer.targetId !== playerId) {
+      return c.json({ error: "This is not your target" }, 403);
+    }
+
+    if (initiatingPlayer.isAlive === false) {
+      return c.json({ error: "You are already dead" }, 400);
+    }
+
+    const targetPlayer = await db.query.lobbyPlayersTable.findFirst({
+      where: and(
+        eq(lobbyPlayersTable.lobbyId, game.id),
+        eq(lobbyPlayersTable.id, playerId),
+      ),
+    });
+
+    if (!targetPlayer) {
+      return c.json({ error: "Player not found" }, 404);
+    }
+
+    if (targetPlayer.isAlive === false) {
+      return c.json({ error: "Target is already dead" }, 400);
+    }
+
+    await db.update(lobbyPlayersTable).set({
+      isAlive: false,
+    }).where(eq(lobbyPlayersTable.id, playerId));
+
+    const sharpImage = sharp(await image.arrayBuffer());
+    sharpImage.avif({ quality: 50 });
+    await uploadFileBuffer({
+      buffer: await sharpImage.toBuffer(),
+      key: `game/${game.code}/player/${playerId}/shot.avif`,
+    });
+
+    redis.publish(
+      `game:${game.code}`,
+      JSON.stringify({
+        type: "player_kill",
+        data: {
+          playerId,
+        },
+      }),
+    );
+
+    return c.json({ message: "Player killed" });
   },
 );
 

@@ -1,5 +1,6 @@
 {
   "imports": {
+    "@aws-sdk/client-s3": "npm:@aws-sdk/client-s3@^3.842.0",
     "@hono/zod-validator": "npm:@hono/zod-validator@^0.7.0",
     "@types/pg": "npm:@types/pg@^8.15.4",
     "drizzle-kit": "npm:drizzle-kit@^0.31.4",
@@ -8,11 +9,12 @@
     "ioredis": "npm:ioredis@^5.6.1",
     "pg": "npm:pg@^8.16.3",
     "@/": "./",
+    "sharp": "npm:sharp@^0.34.2",
     "zod": "npm:zod@^3.25.67"
   },
   "tasks": {
-    "start": "deno run --allow-net --allow-env main.ts",
-    "dev": "deno run --allow-net --allow-env --env-file=.env --watch main.ts",
+    "start": "deno run --allow-net --allow-env --allow-read --allow-sys --allow-ffi main.ts",
+    "dev": "deno run --allow-net --allow-env --env-file=.env --allow-read --allow-sys --allow-ffi --watch main.ts",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },

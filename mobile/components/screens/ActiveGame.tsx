@@ -8,6 +8,7 @@ import { View, ScrollView, TouchableOpacity, Image, Modal, Pressable } from 'rea
 import { Button } from '../Button';
 import { CameraView } from 'expo-camera';
 import type { ApiResponse } from '@/app/game';
+import { api } from '@/lib/axios';
 import { X } from 'lucide-react-native';
 
 const TargetOverlay = ({ player }: { player?: ApiResponse['players'][number] }) => {
@@ -74,6 +75,7 @@ export const ActiveGameScreen = ({
 
   const [isShooting, setIsShooting] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [capturedImageFormat, setCapturedImageFormat] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const cameraRef = useRef<CameraView>(null);
 
@@ -86,6 +88,7 @@ export const ActiveGameScreen = ({
           base64: false,
         });
         setCapturedImage(photo.uri);
+        setCapturedImageFormat(photo.format);
         setIsShooting(false);
       } catch (error) {
         console.error('Error taking picture:', error);
@@ -99,11 +102,16 @@ export const ActiveGameScreen = ({
     setCapturedImage(null);
   };
 
-  const confirmShot = () => {
-    // Here you would typically send the photo to your backend
-    // For now, we'll just discard it
+  const confirmShot = async () => {
+    if (!capturedImage) return;
+
+    const response = await fetch(capturedImage);
+    const blob = await response.blob();
+    const formData = new FormData();
+    formData.append('image', blob, `shot.${capturedImageFormat}`);
+    await api.post(`/game/${gameInfo.code}/player/${target}/shoot`, formData);
+
     setCapturedImage(null);
-    // You might want to show a success message or update game state
   };
 
   if (capturedImage) {
