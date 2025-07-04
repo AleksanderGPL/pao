@@ -11,6 +11,7 @@ import { api } from '@/lib/axios';
 import { useLocalSearchParams } from 'expo-router';
 import { useUsernameStore } from '@/lib/username-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useWebSocket } from '@/hooks/useWebsocket';
 
 export interface ApiResponse {
   id: number;
@@ -66,37 +67,36 @@ export default function GameScreen() {
     getSessionToken();
   }, []);
 
-  useEffect(() => {
-    if (!sessionToken) return;
+  const shouldConnectWebSocket = sessionToken !== null;
 
-    const ws = new WebSocket(
-      `${process.env.EXPO_PUBLIC_API_BASE}/api/game/${params.gameCode}/ws?token=${sessionToken}`
-    );
-
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      switch (message.type) {
-        case 'player_join':
-          if (!players?.some((player) => player.id === message.data.player.id)) {
-            setPlayers((prev) => [...(prev || []), message.data.player] as ApiResponse['players']);
-          }
-          break;
-        case 'start_game':
-          setHasStarted(true);
-          break;
-        case 'player_target_assigned':
-          setCurrentTarget(message.data.targetId);
-          break;
-        default:
-          console.log('Unknown message type:', message.type);
-          break;
-      }
-    };
-
-    return () => {
-      ws.close();
-    };
-  }, [sessionToken, params.gameCode]);
+  useWebSocket(
+    shouldConnectWebSocket
+      ? `${process.env.EXPO_PUBLIC_API_BASE}/api/game/${params.gameCode}/ws?token=${sessionToken}`
+      : '',
+    {
+      onMessage: (event) => {
+        const message = JSON.parse(event.data);
+        switch (message.type) {
+          case 'player_join':
+            if (!players?.some((player) => player.id === message.data.player.id)) {
+              setPlayers(
+                (prev) => [...(prev || []), message.data.player] as ApiResponse['players']
+              );
+            }
+            break;
+          case 'start_game':
+            setHasStarted(true);
+            break;
+          case 'player_target_assigned':
+            setCurrentTarget(message.data.targetId);
+            break;
+          default:
+            console.log('Unknown message type:', message.type);
+            break;
+        }
+      },
+    }
+  );
 
   const fetchGameData = async () => {
     try {
