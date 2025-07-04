@@ -195,21 +195,19 @@ export default function HomeScreen() {
                   </ShadowView>
                 </View>
                 {/* Input Section */}
-                <View className="m-4 w-full max-w-[400px] gap-2 self-center lg:ml-8 lg:mt-0 lg:w-1/2 lg:flex-1 lg:justify-center lg:self-start">
+                <View className="m-4 w-full max-w-[400px] gap-4 self-center lg:ml-8 lg:mt-0 lg:w-1/2 lg:flex-1 lg:justify-center lg:self-start">
                   <Input
                     placeholder="Enter game code"
                     value={gameCode}
                     onChangeText={(text) => {
                       setGameCode(text);
                     }}
-                    className="w-full py-2 text-sm sm:py-3 sm:text-base"
+                    className="w-full py-2 text-sm sm:py-3 sm:text-base rounded-2xl"
                   />
                   <Button
-                    variant={'outline'}
-                    onPress={handleJoinGame}
-                    className="w-full bg-white py-2 shadow-sm sm:py-3">
+                    onPress={handleJoinGame}>
                     <Text
-                      className={`${!isValidGameCode(gameCode) ? 'text-muted-foreground' : ''} text-sm sm:text-base`}>
+                      className={`${!isValidGameCode(gameCode) ? 'font-bold text-muted-foreground text-white' : ''} text-sm sm:text-base`}>
                       Join Game
                     </Text>
                   </Button>
