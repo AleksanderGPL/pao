@@ -11,6 +11,9 @@
     "experiments": {
       "tsconfigPaths": true
     },
+    "developmentClient": {
+      "silenceUnusedWarnings": true
+    },
 
     "plugins": [
       [
@@ -34,7 +37,11 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "assets/*",
+      "assets/images/*",
+      "assets/icons/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
