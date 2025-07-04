@@ -4,10 +4,11 @@ import { Container } from '@/components/Container';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar';
 import { useEffect, useState, useRef } from 'react';
-import { View, ScrollView, TouchableOpacity, Image, Modal } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Image, Modal, Pressable } from 'react-native';
 import { Button } from '../Button';
 import { CameraView } from 'expo-camera';
 import type { ApiResponse } from '@/app/game';
+import { X } from 'lucide-react-native';
 
 const TargetOverlay = ({ player }: { player?: ApiResponse['players'][number] }) => {
   return (
@@ -133,16 +134,21 @@ export const ActiveGameScreen = ({
 
         <TargetOverlay player={currentTarget!} />
 
-        <View className="absolute bottom-10 left-0 right-0 flex-row justify-center gap-4 px-4">
-          <Button
-            className="flex-1 bg-red-500"
+        <View className="absolute bottom-10 left-0 right-0 flex-row items-center justify-center gap-4 px-4">
+          <TouchableOpacity
+            activeOpacity={0.5}
+            className="absolute left-4 size-[2.5rem] flex-1 items-center justify-center rounded-full bg-black/50"
             onPress={() => setIsShooting(false)}
             disabled={isCapturing}>
-            <Text>Cancel</Text>
-          </Button>
-          <Button className="flex-1" onPress={takePicture} disabled={isCapturing}>
-            <Text>{isCapturing ? 'Taking...' : 'Shoot'}</Text>
-          </Button>
+            <X size={20} className="text-white/80" />
+          </TouchableOpacity>
+          <View className="rounded-full border-[5px] border-white p-1">
+            <TouchableOpacity
+              activeOpacity={0.5}
+              className="size-[3rem] rounded-full bg-white"
+              onPress={takePicture}
+              disabled={isCapturing}></TouchableOpacity>
+          </View>
         </View>
       </View>
     );

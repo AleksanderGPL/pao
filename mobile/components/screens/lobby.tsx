@@ -100,7 +100,7 @@ export default function LobbyScreen({
 
         {/* QR Code - Centered and Responsive */}
 
-        <ShadowView className="w-full max-w-[400px] items-center self-center rounded-3xl bg-white pb-6">
+        <ShadowView className="w-full max-w-[400px] items-center self-center rounded-3xl bg-white pb-7">
           <QRCodeStyled
             data={process.env.EXPO_PUBLIC_DEPLOY_LINK + '?gameCode=' + gameCode}
             className="aspect-square h-[20rem] w-full"
