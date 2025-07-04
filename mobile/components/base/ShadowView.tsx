@@ -8,28 +8,20 @@ interface ShadowViewProps extends ViewProps {
   shadowSize?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 
-export function ShadowView({
-  children,
-  className,
-  shadowSize = 'md',
-  ...rest
-}: ShadowViewProps) {
+export function ShadowView({ children, className, shadowSize = 'md', ...rest }: ShadowViewProps) {
   const shadowClasses = {
-    sm: 'shadow-sm',
-    md: 'shadow-md',
-    lg: 'shadow-lg',
-    xl: 'shadow-xl',
+    sm: 'shadow-sm shadow-black/10',
+    md: 'shadow-md shadow-black/10',
+    lg: 'shadow-lg shadow-black/10',
+    xl: 'shadow-xl shadow-black/10',
     '2xl': 'shadow-2xl',
   };
 
   const baseClasses = shadowClasses[shadowSize];
 
   return (
-    <View
-      className={cn(baseClasses, className)}
-      {...rest}
-    >
+    <View className={cn(baseClasses, className)} {...rest}>
       {children}
     </View>
   );
-} 
+}

@@ -99,44 +99,40 @@ export default function LobbyScreen({
         </View>
 
         {/* QR Code - Centered and Responsive */}
-        <View className="w-full max-w-[400px] items-center self-center rounded-xl">
-          <ShadowView className="items-center rounded-xl bg-white">
-            <QRCodeStyled
-              data={process.env.EXPO_PUBLIC_DEPLOY_LINK + '?gameCode=' + gameCode}
-              className="aspect-square h-[20rem] w-full rounded-xl"
-              padding={20}
-              pieceSize={8}
-              style={{
-                width: qrSize,
-                height: qrSize,
-              }}
-            />
-            <Button
-              variant="outline"
-              onPress={copyGameCode}
-              className="flex-row items-center gap-2 rounded-xl border-0">
-              <Text className="font-mono text-lg font-semibold text-muted-foreground">
-                {gameCode}
-              </Text>
-              <Copy size={18} className="text-muted-foreground" />
-            </Button>
-          </ShadowView>
-        </View>
+
+        <ShadowView className="w-full max-w-[400px] items-center self-center rounded-3xl bg-white pb-6">
+          <QRCodeStyled
+            data={process.env.EXPO_PUBLIC_DEPLOY_LINK + '?gameCode=' + gameCode}
+            className="aspect-square h-[20rem] w-full"
+            padding={40}
+            pieceSize={8}
+            style={{
+              width: qrSize,
+              height: qrSize,
+            }}
+          />
+          <Button
+            variant="outline"
+            onPress={copyGameCode}
+            className="-mt-6 flex-row items-center gap-2 rounded-xl border-0 bg-black/5">
+            <Text className="font-mono text-lg font-medium text-muted-foreground">{gameCode}</Text>
+            <Copy size={18} className="text-muted-foreground" />
+          </Button>
+        </ShadowView>
 
         {/* Players List with Refresh */}
-        <View className="mb-4 gap-3">
+        <View className="my-4 gap-3">
           <View className="flex-row items-center justify-between">
             <Text className="text-lg font-semibold">Players ({validPlayers.length})</Text>
-            <ShadowView>
-              <Button
-                variant="outline"
-                onPress={handleRefresh}
-                disabled={isRefreshing}
-                className="flex-row items-center gap-2">
-                <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
-                <Text>{isRefreshing ? 'Refreshing...' : 'Refresh'}</Text>
-              </Button>
-            </ShadowView>
+
+            <Button
+              variant="outline"
+              onPress={handleRefresh}
+              disabled={isRefreshing}
+              className="flex-row items-center gap-2">
+              <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
+              <Text>{isRefreshing ? 'Refreshing...' : 'Refresh'}</Text>
+            </Button>
           </View>
           <View className="gap-3">
             {(showAllPlayers ? validPlayers : validPlayers.slice(0, 3)).map((player) => (
@@ -150,7 +146,7 @@ export default function LobbyScreen({
                   <Text className="text-lg font-semibold">
                     {Capitalize(player.user.name)}
                     {player.isHost && (
-                      <Text className="text-[grey] text-[1rem] font-bold"> Host</Text>
+                      <Text className="text-[1rem] font-bold text-[grey]"> Host</Text>
                     )}
                     {currentUser === player.user.name && (
                       <Text className="ml-2 text-sm text-muted-foreground"> (you)</Text>
