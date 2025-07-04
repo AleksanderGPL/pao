@@ -17,8 +17,9 @@
         "expo-camera",
         {
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan QR codes",
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-          "recordAudioAndroid": false
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "recordAudioIOS": false
         }
       ]
     ],
@@ -35,7 +36,11 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": ["audio"],
+        "NSMicrophoneUsageDescription": "This app does not use the microphone"
+      }
     },
     "android": {
       "adaptiveIcon": {

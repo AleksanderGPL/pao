@@ -67,9 +67,9 @@ export default function TabLayout() {
               height: 70,
               backgroundColor: '#fff', // Always white
               borderTopWidth: 0,
-              paddingHorizontal: 30,
+              paddingHorizontal: 40,
               borderRadius: 20,
-              marginHorizontal: 20,
+              marginHorizontal: 12,
               marginBottom: 20,
               position: 'absolute',
             },
@@ -102,12 +102,12 @@ export default function TabLayout() {
             title: 'Create',
             tabBarIcon: ({ color, focused }) => (
               <View className="items-center flex-row gap-2">
-              <Icon
-                size={25}
-                icon={CirclePlus}
-                className={focused ? 'text-foreground' : 'text-muted-foreground/70'}
-              />
-              <Text className="text-l">Create</Text>
+                <Icon
+                  size={25}
+                  icon={CirclePlus}
+                  className={focused ? 'text-foreground' : 'text-muted-foreground/70'}
+                />
+                <Text className="text-l">Create</Text>
               </View>
             ),
           }}

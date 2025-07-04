@@ -1,4 +1,4 @@
-import { Alert, Platform, View, useWindowDimensions, SafeAreaView } from 'react-native';
+import { Alert, Platform, View, useWindowDimensions, SafeAreaView, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useState, useEffect } from 'react';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -20,6 +20,7 @@ export default function HomeScreen() {
   const [gameCode, setGameCode] = useState('');
   const [permission, requestPermission] = useCameraPermissions();
   const [hasScanned, setHasScanned] = useState(false);
+  const [cameraKey, setCameraKey] = useState(0);
   const router = useRouter();
   const { username } = useUsernameStore();
 
@@ -28,6 +29,8 @@ export default function HomeScreen() {
     React.useCallback(() => {
       setHasScanned(false);
       setGameCode('');
+      // Force camera restart by changing the key
+      setCameraKey(prev => prev + 1);
     }, [])
   );
 
@@ -77,6 +80,15 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
       <View
         className="h-full flex-1 px-4 pt-8 md:px-6 lg:px-8 max-w-[500px] md:max-w-none self-center w-full"
         style={{
@@ -88,17 +100,17 @@ export default function HomeScreen() {
       </View>
       <View className="w-full items-center pb-6">
           <Text
-            className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-extrabold text-center leading-tight sm:leading-snug lg:leading-normal xl:leading-relaxed"
+            className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-center leading-tight"
           >
           {username ? `Welcome ` : 'Join a game'}
           {username && (
-              <Text className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-extrabold">
+              <Text className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold">
                 {username}!
               </Text>
           )}
         </Text>
           <Text
-            className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-500 text-center mt-2"
+            className="text-xs sm:text-sm lg:text-base xl:text-lg text-gray-500 text-center mt-2"
           >
           {username
             ? 'Ready to play? Scan a code or enter one below to join a game.'
@@ -146,6 +158,7 @@ export default function HomeScreen() {
                   </View>
                 ) : (
                   <CameraView
+                    key={cameraKey}
                     style={{ width: '100%', height: '100%', borderRadius: 24, overflow: 'hidden' }}
                     facing="back"
                     barcodeScannerSettings={{
@@ -158,7 +171,7 @@ export default function HomeScreen() {
             </View>
             {/* Input Section */}
             <View
-              className="gap-2 mt-2 sm:mt-4 lg:mt-0 lg:ml-8 lg:flex-1 lg:w-1/2 max-w-[400px] self-center lg:self-start justify-center"
+              className="gap-2 w-full max-w-[400px] self-center m-4 lg:mt-0 lg:ml-8 lg:flex-1 lg:w-1/2 lg:self-start lg:justify-center"
             >
               <Input
                 placeholder="Enter game code"
@@ -166,9 +179,13 @@ export default function HomeScreen() {
                 onChangeText={(text) => {
                   setGameCode(text);
                 }}
-                className="text-sm sm:text-base py-2 sm:py-3"
+                className="text-sm sm:text-base py-2 sm:py-3 w-full"
               />
-              <Button variant={'outline'} onPress={handleJoinGame} className="py-2 sm:py-3">
+              <Button 
+                variant={'outline'} 
+                onPress={handleJoinGame} 
+                className="py-2 sm:py-3 w-full bg-white shadow-sm"
+              >
                 <Text className={`${!isValidGameCode(gameCode) ? 'text-muted-foreground' : ''} text-sm sm:text-base`}>
                   Join Game
                 </Text>
@@ -177,6 +194,8 @@ export default function HomeScreen() {
           </View>
         </View>
       </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
