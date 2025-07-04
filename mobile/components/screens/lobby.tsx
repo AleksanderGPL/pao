@@ -76,7 +76,7 @@ export default function LobbyScreen({
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="p-5 flex-1 pb-0 pt-8">
+        contentContainerClassName="p-5 pb-0 min-h-screen pt-8">
         {/* Back Button */}
         <View className="mb-4">
           <BackButton onPress={handleBack} />
@@ -123,32 +123,27 @@ export default function LobbyScreen({
               <Text>{isRefreshing ? 'Refreshing...' : 'Refresh'}</Text>
             </Button>
           </View>
-          <ScrollView
-            className="flex-1"
-            showsVerticalScrollIndicator={true}
-            nestedScrollEnabled={true}>
-            <View className="gap-3">
-              {validPlayers.map((player) => (
-                <View
-                  key={player.user.name}
-                  className="flex-row items-center gap-3 rounded-2xl bg-card p-3 px-4">
-                  <Avatar className="h-12 w-12" alt={`${player.user.name} profile picture`}>
-                    <AvatarImage source={{ uri: player.user.profilePicture }} />
-                  </Avatar>
-                  <View className="flex-1">
-                    <Text className="text-lg font-semibold">
-                      {player.user.name}
-                      {currentUser === player.user.name && (
-                        <Text className="ml-2 text-sm text-muted-foreground">(you)</Text>
-                      )}
-                    </Text>
-                  </View>
+          <View className="gap-3">
+            {validPlayers.map((player) => (
+              <View
+                key={player.user.name}
+                className="flex-row items-center gap-3 rounded-2xl bg-card p-3 px-4">
+                <Avatar className="h-12 w-12" alt={`${player.user.name} profile picture`}>
+                  <AvatarImage source={{ uri: player.user.profilePicture }} />
+                </Avatar>
+                <View className="flex-1">
+                  <Text className="text-lg font-semibold">
+                    {player.user.name}
+                    {currentUser === player.user.name && (
+                      <Text className="ml-2 text-sm text-muted-foreground">(you)</Text>
+                    )}
+                  </Text>
                 </View>
-              ))}
-            </View>
-          </ScrollView>
+              </View>
+            ))}
+          </View>
         </View>
-
+        <View className="flex-1" />
         <View className="w-full pb-5">
           {validPlayers.find((player) => player.isHost && currentUser === player.user.name) ? (
             <Button onPress={onStartGame} className="w-full">
