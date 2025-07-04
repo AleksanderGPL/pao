@@ -103,6 +103,8 @@ export default function GameScreen() {
       const res = await api.post<ApiResponse>(`/game/${params.gameCode}/join`);
       setGameInfo(res.data);
       setPlayers(res.data.players);
+
+      setHasStarted(res.data.status === 'active');
       setHasConnected(true);
     } catch (err: any) {
       if (err.response?.status === 404) {

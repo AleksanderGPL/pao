@@ -150,7 +150,7 @@ export const ActiveGameScreen = ({
             <CardTitle>Game {gameInfo.code}</CardTitle>
             <CardDescription>
               {gameInfo.status === 'active' ? '🟢 Active' : '🔴 Inactive'} • {alivePlayers.length}{' '}
-              of {gameInfo.maxPlayers} players alive
+              of {players.length} players alive
             </CardDescription>
           </CardHeader>
         </Card>
@@ -206,7 +206,7 @@ export const ActiveGameScreen = ({
               <View className="flex-row justify-between">
                 <Text className="text-muted-foreground">Players Alive</Text>
                 <Text className="font-semibold">
-                  {alivePlayers.length}/{gameInfo.maxPlayers}
+                  {alivePlayers.length}/{players.length}
                 </Text>
               </View>
             </View>
