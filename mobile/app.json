@@ -4,18 +4,12 @@
     "slug": "my-expo-app",
     "version": "1.0.0",
     "scheme": "pao",
-
     "web": {
       "favicon": "./assets/favicon.png"
     },
-
     "experiments": {
       "tsconfigPaths": true
     },
-    "developmentClient": {
-      "silenceUnusedWarnings": true
-    },
-
     "plugins": [
       [
         "expo-camera",
@@ -27,22 +21,15 @@
         }
       ]
     ],
-
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-
     "userInterfaceStyle": "light",
-
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "assets/*",
-      "assets/images/*",
-      "assets/icons/*"
-    ],
+    "assetBundlePatterns": ["assets/*", "assets/images/*", "assets/icons/*"],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -54,7 +41,9 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": ["android.permission.CAMERA", "android.permission.CAMERA"],
+      "package": "com.qazwsxedc123.pao"
     }
   }
 }
