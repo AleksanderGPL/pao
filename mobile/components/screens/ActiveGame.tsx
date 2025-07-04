@@ -9,30 +9,40 @@ import { Button } from '../Button';
 import { CameraView } from 'expo-camera';
 import type { ApiResponse } from '@/app/game';
 
-const TargetOverlay = ({ player }: { player: ApiResponse['players'][number] }) => (
-  <View className="absolute left-4 right-4 top-10">
-    <Card className="border-white/20 bg-black/70">
-      <CardContent className="p-3">
-        <View className="flex-row items-center space-x-3">
-          <Avatar className="h-10 w-10" alt={`${player.user.name} profile picture`}>
-            <AvatarImage
-              source={{
-                uri: player.user.profilePicture,
-              }}
-            />
-            <AvatarFallback>
-              <Text className="text-sm font-semibold text-white">{player.user.name.charAt(0)}</Text>
-            </AvatarFallback>
-          </Avatar>
-          <View className="flex-1">
-            <Text className="font-semibold text-white">🎯 Target: {player.user.name}</Text>
-            <Text className="text-xs text-white/80">Find and eliminate this player</Text>
+const TargetOverlay = ({ player }: { player?: ApiResponse['players'][number] }) => {
+  return (
+    <View className="absolute left-4 right-4 top-10">
+      <Card className="border-white/20 bg-black/70">
+        <CardContent className="p-3">
+          <View className="flex-row items-center space-x-3">
+            {player ? (
+              <>
+                <Avatar className="h-10 w-10" alt={`${player.user.name} profile picture`}>
+                  <AvatarImage
+                    source={{
+                      uri: player.user.profilePicture,
+                    }}
+                  />
+                  <AvatarFallback>
+                    <Text className="text-sm font-semibold text-white">
+                      {player.user.name.charAt(0)}
+                    </Text>
+                  </AvatarFallback>
+                </Avatar>
+                <View className="flex-1">
+                  <Text className="font-semibold text-white">🎯 Target: {player.user.name}</Text>
+                  <Text className="text-xs text-white/80">Find and eliminate this player</Text>
+                </View>
+              </>
+            ) : (
+              <Text className="text-sm font-semibold text-white">No target</Text>
+            )}
           </View>
-        </View>
-      </CardContent>
-    </Card>
-  </View>
-);
+        </CardContent>
+      </Card>
+    </View>
+  );
+};
 
 const ShootScreen = () => {
   return (
