@@ -14,6 +14,10 @@ import * as Clipboard from 'expo-clipboard';
 import { BackButton } from '../base/BackButton';
 import { ShadowView } from '../base/ShadowView';
 
+function Capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 export default function LobbyScreen({
   players,
   gameCode,
@@ -71,6 +75,10 @@ export default function LobbyScreen({
   // Filter out any invalid player objects
   const validPlayers = players.filter((player) => player && player.user && player.user.name);
 
+  // Console log players as soon as we get them
+  console.log('Players received in lobby:', players);
+  console.log('Valid players:', validPlayers);
+
   return (
     <>
       <ScrollView
@@ -114,14 +122,16 @@ export default function LobbyScreen({
         <View className="mb-4 gap-3">
           <View className="flex-row items-center justify-between">
             <Text className="text-lg font-semibold">Players ({validPlayers.length})</Text>
-            <Button
-              variant="outline"
-              onPress={handleRefresh}
-              disabled={isRefreshing}
-              className="flex-row items-center gap-2">
-              <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
-              <Text>{isRefreshing ? 'Refreshing...' : 'Refresh'}</Text>
-            </Button>
+            <ShadowView>
+              <Button
+                variant="outline"
+                onPress={handleRefresh}
+                disabled={isRefreshing}
+                className="flex-row items-center gap-2">
+                <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
+                <Text>{isRefreshing ? 'Refreshing...' : 'Refresh'}</Text>
+              </Button>
+            </ShadowView>
           </View>
           <View className="gap-3">
             {(showAllPlayers ? validPlayers : validPlayers.slice(0, 3)).map((player) => (
@@ -133,9 +143,12 @@ export default function LobbyScreen({
                 </Avatar>
                 <View className="flex-1">
                   <Text className="text-lg font-semibold">
-                    {player.user.name}
+                    {Capitalize(player.user.name)}
+                    {player.isHost && (
+                      <Text className="text-[grey] text-[1rem] font-bold"> Host</Text>
+                    )}
                     {currentUser === player.user.name && (
-                      <Text className="ml-2 text-sm text-muted-foreground">(you)</Text>
+                      <Text className="ml-2 text-sm text-muted-foreground"> (you)</Text>
                     )}
                   </Text>
                 </View>

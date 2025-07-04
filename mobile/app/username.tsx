@@ -22,6 +22,10 @@ export default function UsernameScreen() {
     return trimmedName.length >= 2 && trimmedName.length <= 20;
   }
 
+  function Capitalize(str: string){
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
   async function handleContinue() {
     if (!isValidUsername(username)) {
       setShowError(true);
@@ -36,7 +40,7 @@ export default function UsernameScreen() {
         name: username.trim(),
       });
 
-      await setUsernameInStore(username.trim());
+      await setUsernameInStore(Capitalize(username.trim()));
       await AsyncStorage.setItem('sessionToken', response.data.sessionToken);
 
       // Navigate to main app
