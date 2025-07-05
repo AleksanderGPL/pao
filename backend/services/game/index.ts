@@ -121,6 +121,7 @@ app.post(
 
     return c.json({
       ...game,
+      currentUserId: session.user.id,
       players: [
         ...game.players,
         newPlayer,

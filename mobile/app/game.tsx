@@ -78,6 +78,10 @@ export default function GameScreen() {
         const message = JSON.parse(event.data);
         switch (message.type) {
           case 'player_join':
+            if (message.data.player.id === sessionToken) {
+              console.log('You joined the game');
+              return;
+            }
             if (!players?.some((player) => player.id === message.data.player.id)) {
               setPlayers(
                 (prev) => [...(prev || []), message.data.player] as ApiResponse['players']
@@ -98,6 +102,7 @@ export default function GameScreen() {
                   )
                 : null
             );
+
             break;
           default:
             console.log('Unknown message type:', message.type);
