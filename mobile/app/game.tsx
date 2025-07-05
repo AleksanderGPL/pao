@@ -12,6 +12,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useUsernameStore } from '@/lib/username-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useWebSocket } from '@/hooks/useWebsocket';
+import EliminatedScreen from '@/components/screens/Eliminated';
 
 export interface ApiResponse {
   id: number;
@@ -20,22 +21,21 @@ export interface ApiResponse {
   maxPlayers: number;
   status: 'inactive' | 'active' | 'finished';
   createdAt: string;
-  players: [
-    {
-      id: number;
-      isAlive: boolean;
-      isHost: boolean;
-      user: {
-        name: string;
-        profilePicture: string;
-      };
-    },
-  ];
+  players: {
+    id: number;
+    isAlive: boolean;
+    isHost: boolean;
+    user: {
+      name: string;
+      profilePicture: string;
+    };
+  }[];
 }
 
 export default function GameScreen() {
   const [hasConnected, setHasConnected] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
+  const [isEliminated, setIsEliminated] = useState(false);
   const [currentUser, setCurrentUser] = useState<string>('');
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const params = useLocalSearchParams();
@@ -90,6 +90,15 @@ export default function GameScreen() {
           case 'player_target_assigned':
             setCurrentTarget(message.data.targetId);
             break;
+          case 'player_kill':
+            setPlayers((prev) =>
+              prev
+                ? prev.map((player) =>
+                    player.id === message.data.playerId ? { ...player, isAlive: false } : player
+                  )
+                : null
+            );
+            break;
           default:
             console.log('Unknown message type:', message.type);
             break;
@@ -137,6 +146,10 @@ export default function GameScreen() {
         currentUser={currentUser}
       />
     );
+  }
+
+  if (isEliminated) {
+    return <EliminatedScreen />;
   }
 
   return <ActiveGameScreen players={players!} gameInfo={gameInfo!} target={currentTarget!} />;
