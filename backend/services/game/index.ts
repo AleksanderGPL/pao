@@ -91,7 +91,10 @@ app.post(
     });
 
     if (existingPlayer) {
-      return c.json(game);
+      return c.json({
+        ...game,
+        playerId: existingPlayer.id,
+      });
     }
 
     const [player] = await db.insert(lobbyPlayersTable).values({
@@ -121,7 +124,7 @@ app.post(
 
     return c.json({
       ...game,
-      currentUserId: session.user.id,
+      playerId: player.id,
       players: [
         ...game.players,
         newPlayer,
