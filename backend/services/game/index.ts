@@ -97,6 +97,10 @@ app.post(
       });
     }
 
+    if (game.players.length >= game.maxPlayers) {
+      return c.json({ error: "Game is full" }, 400);
+    }
+
     const [player] = await db.insert(lobbyPlayersTable).values({
       lobbyId: game.id,
       userId: session.user.id,
