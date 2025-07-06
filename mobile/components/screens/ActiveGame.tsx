@@ -12,6 +12,7 @@ import {
   Modal,
   Pressable,
   Platform,
+  Alert,
 } from 'react-native';
 import { Button } from '../Button';
 import { CameraView } from 'expo-camera';
@@ -108,18 +109,73 @@ export const ActiveGameScreen = ({
 
   const discardPhoto = () => {
     setCapturedImage(null);
+    setCapturedImageFormat(null);
+    setIsShooting(true); // Go back to camera view
   };
 
   const confirmShot = async () => {
-    if (!capturedImage) return;
+    if (!capturedImage || !capturedImageFormat) return;
 
-    const response = await fetch(capturedImage);
-    const blob = await response.blob();
-    const formData = new FormData();
-    formData.append('image', blob, `shot.${capturedImageFormat}`);
-    await api.post(`/game/${gameInfo.code}/player/${target}/shoot`, formData);
+    try {
+      console.log('Starting shot confirmation...');
+      console.log('Game code:', gameInfo.code);
+      console.log('Target ID:', target);
+      console.log('Image format:', capturedImageFormat);
+      
+      // Fetch the image and create a proper File object
+      const response = await fetch(capturedImage);
+      if (!response.ok) {
+        throw new Error('Failed to fetch captured image');
+      }
 
-    setCapturedImage(null);
+      const blob = await response.blob();
+      console.log('Blob size:', blob.size, 'bytes');
+      
+      // Create a proper File object with correct MIME type
+      const mimeType = `image/${capturedImageFormat.toLowerCase()}`;
+      const file = new File([blob], `shot.${capturedImageFormat}`, {
+        type: mimeType,
+        lastModified: Date.now(),
+      });
+      
+      console.log('File created:', file.name, file.type, file.size);
+
+      // Create FormData with the proper File object
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      console.log('FormData created, making API request...');
+
+      // Upload with proper headers
+      const apiResponse = await api.post(`/game/${gameInfo.code}/player/${target}/shoot`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: 30000, // 30 second timeout
+      });
+      
+      console.log('API response:', apiResponse.data);
+
+      setCapturedImage(null);
+      setCapturedImageFormat(null);
+      
+      // Show success feedback
+      Alert.alert('Success', 'Target eliminated!');
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Error message:', error.message);
+      
+      let errorMessage = 'Failed to upload image';
+      if (error?.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      Alert.alert('Upload Failed', errorMessage);
+    }
   };
 
   if (capturedImage) {

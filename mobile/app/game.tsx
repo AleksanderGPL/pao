@@ -162,7 +162,15 @@ export default function GameScreen() {
   }
 
   if (isEliminated) {
-    return <EliminatedScreen />;
+    return (
+      <EliminatedScreen
+        onBackToLobby={() => {
+          setIsEliminated(false);
+          setHasStarted(false);
+          fetchGameData(); // Refresh game data
+        }}
+      />
+    );
   }
 
   return <ActiveGameScreen players={players!} gameInfo={gameInfo!} target={currentTarget!} />;
