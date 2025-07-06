@@ -13,6 +13,7 @@ import { useUsernameStore } from '@/lib/username-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useWebSocket } from '@/hooks/useWebsocket';
 import EliminatedScreen from '@/components/screens/Eliminated';
+import { WinScreen } from '@/components/screens/WinScreen';
 
 export interface ApiResponse {
   id: number;
@@ -37,6 +38,7 @@ export default function GameScreen() {
   const [hasConnected, setHasConnected] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [isEliminated, setIsEliminated] = useState(false);
+  const [hasEnded, setHasEnded] = useState(true);
   const [currentUser, setCurrentUser] = useState<string>('');
   const currentUserId = useRef<number | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
@@ -111,6 +113,9 @@ export default function GameScreen() {
               console.log('isEliminated', isEliminated);
             }
             break;
+          case 'game_ended':
+            setHasEnded(true);
+            break;
           default:
             console.log('Unknown message type:', message.type);
             break;
@@ -159,6 +164,10 @@ export default function GameScreen() {
         currentUser={currentUser}
       />
     );
+  }
+
+  if (hasEnded) {
+    return <WinScreen />;
   }
 
   if (isEliminated) {
