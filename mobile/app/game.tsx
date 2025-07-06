@@ -3,7 +3,7 @@ import { Text } from '@/components/Text';
 import { Container } from '@/components/Container';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View, ScrollView } from 'react-native';
 import { ActiveGameScreen } from '@/components/screens/ActiveGame';
 import LobbyScreen from '@/components/screens/lobby';
@@ -21,6 +21,7 @@ export interface ApiResponse {
   maxPlayers: number;
   status: 'inactive' | 'active' | 'finished';
   createdAt: string;
+  playerId: number;
   players: {
     id: number;
     isAlive: boolean;
@@ -37,6 +38,7 @@ export default function GameScreen() {
   const [hasStarted, setHasStarted] = useState(false);
   const [isEliminated, setIsEliminated] = useState(false);
   const [currentUser, setCurrentUser] = useState<string>('');
+  const currentUserId = useRef<number | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const params = useLocalSearchParams();
   const { username, loadUsername } = useUsernameStore();
@@ -78,10 +80,11 @@ export default function GameScreen() {
         const message = JSON.parse(event.data);
         switch (message.type) {
           case 'player_join':
-            if (message.data.player.id === sessionToken) {
+            if (message.data.player.id === currentUserId.current) {
               console.log('You joined the game');
               return;
             }
+            console.log('player_join', message.data.player.id);
             if (!players?.some((player) => player.id === message.data.player.id)) {
               setPlayers(
                 (prev) => [...(prev || []), message.data.player] as ApiResponse['players']
@@ -95,6 +98,7 @@ export default function GameScreen() {
             setCurrentTarget(message.data.targetId);
             break;
           case 'player_kill':
+            console.log('player_kill', message.data.playerId);
             setPlayers((prev) =>
               prev
                 ? prev.map((player) =>
@@ -102,7 +106,10 @@ export default function GameScreen() {
                   )
                 : null
             );
-
+            if (message.data.playerId === currentUserId.current) {
+              setIsEliminated(true);
+              console.log('isEliminated', isEliminated);
+            }
             break;
           default:
             console.log('Unknown message type:', message.type);
@@ -117,7 +124,8 @@ export default function GameScreen() {
       const res = await api.post<ApiResponse>(`/game/${params.gameCode}/join`);
       setGameInfo(res.data);
       setPlayers(res.data.players);
-
+      currentUserId.current = res.data.playerId;
+      console.log(res.data.playerId);
       setHasStarted(res.data.status === 'active');
       setHasConnected(true);
     } catch (err: any) {

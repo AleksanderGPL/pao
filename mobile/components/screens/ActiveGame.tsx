@@ -4,7 +4,15 @@ import { Container } from '@/components/Container';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar';
 import { useEffect, useState, useRef } from 'react';
-import { View, ScrollView, TouchableOpacity, Image, Modal, Pressable } from 'react-native';
+import {
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Modal,
+  Pressable,
+  Platform,
+} from 'react-native';
 import { Button } from '../Button';
 import { CameraView } from 'expo-camera';
 import type { ApiResponse } from '@/app/game';
@@ -138,7 +146,11 @@ export const ActiveGameScreen = ({
   if (isShooting) {
     return (
       <View className="h-full w-full">
-        <CameraView ref={cameraRef} facing={'front'} className="h-full w-full" />
+        <CameraView
+          ref={cameraRef}
+          facing={Platform.OS === 'web' ? undefined : 'back'}
+          className="h-full w-full"
+        />
 
         <TargetOverlay player={currentTarget!} />
 
