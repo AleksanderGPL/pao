@@ -27,7 +27,7 @@ export default function EliminatedScreen({ onBackToLobby }: { onBackToLobby?: ()
         <Text className="mb-8 text-center text-lg text-gray-600">Better luck next time</Text>
 
         <Button onPress={handleBackToLobby} className="w-full">
-          <Text>Back to Lobby</Text>
+          <Text>Watch Game</Text>
         </Button>
       </ShadowView>
     </View>

@@ -4,8 +4,9 @@ import { Container } from '@/components/Container';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar';
 import { useEffect, useRef, useState } from 'react';
-import { View, ScrollView } from 'react-native';
+import { View, ScrollView, Platform } from 'react-native';
 import { ActiveGameScreen } from '@/components/screens/ActiveGame';
+import { SpectatorScreen } from '@/components/screens/SpectatorScreen';
 import LobbyScreen from '@/components/screens/lobby';
 import { api } from '@/lib/axios';
 import { useLocalSearchParams } from 'expo-router';
@@ -156,38 +157,45 @@ export default function GameScreen() {
     fetchGameData();
   }, [params.gameCode]);
 
-  if (!hasConnected) {
-    return <LoadingScreen />;
-  }
+  // Check if current player is actually eliminated
+  const currentPlayer = players?.find((p) => p.id === currentPlayerId.current);
+  const isPlayerEliminated = currentPlayer ? !currentPlayer.isAlive : false;
 
-  if (!hasStarted) {
-    return (
-      <LobbyScreen
-        players={players!}
-        gameCode={gameInfo!.code}
-        gameName={gameInfo!.name}
-        onStartGame={startGame}
-        onRefresh={fetchGameData}
-        currentUser={currentUser}
-      />
-    );
-  }
-
-  if (hasEnded) {
-    return <WinScreen />;
-  }
-
-  if (isEliminated) {
-    return (
-      <EliminatedScreen
-        onBackToLobby={() => {
-          setIsEliminated(false);
-          // Don't set hasStarted to false - stay in the game
-          fetchGameData(); // Refresh game data
-        }}
-      />
-    );
-  }
-
-  return <ActiveGameScreen players={players!} gameInfo={gameInfo!} target={currentTarget!} isEliminated={isEliminated} />;
+  return (
+    <View className={`flex-1 ${Platform.OS === 'android' ? 'mt-4' : ''}`}>
+      {!hasConnected ? (
+        <LoadingScreen />
+      ) : !hasStarted ? (
+        <LobbyScreen
+          players={players!}
+          gameCode={gameInfo!.code}
+          gameName={gameInfo!.name}
+          onStartGame={startGame}
+          onRefresh={fetchGameData}
+          currentUser={currentUser}
+        />
+      ) : hasEnded ? (
+        <WinScreen />
+      ) : isEliminated || isPlayerEliminated ? (
+        isEliminated ? (
+          <EliminatedScreen
+            onBackToLobby={() => {
+              setIsEliminated(false);
+              // This will now show the SpectatorScreen since isPlayerEliminated is still true
+            }}
+          />
+        ) : (
+          <SpectatorScreen players={players!} gameInfo={gameInfo!} />
+        )
+      ) : (
+        <ActiveGameScreen 
+          players={players!} 
+          gameInfo={gameInfo!} 
+          target={currentTarget!} 
+          isEliminated={isEliminated}
+          currentPlayerId={currentPlayerId.current}
+        />
+      )}
+    </View>
+  );
 }
