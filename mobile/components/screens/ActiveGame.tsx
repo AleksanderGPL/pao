@@ -12,12 +12,13 @@ import {
   Modal,
   Pressable,
   Platform,
+  Alert,
 } from 'react-native';
 import { Button } from '../Button';
-import { CameraView } from 'expo-camera';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import type { ApiResponse } from '@/app/game';
 import { api } from '@/lib/axios';
-import { X } from 'lucide-react-native';
+import { X, AlertCircle } from 'lucide-react-native';
 
 const TargetOverlay = ({ player }: { player?: ApiResponse['players'][number] }) => {
   return (
@@ -54,10 +55,34 @@ const TargetOverlay = ({ player }: { player?: ApiResponse['players'][number] }) 
   );
 };
 
-const ShootScreen = () => {
+const CameraErrorView = ({ error, onRetry }: { error: string; onRetry: () => void }) => {
   return (
-    <View className="flex-1 items-center justify-center">
-      <CameraView facing={'front'} className="h-full w-full" />
+    <View className="flex-1 items-center justify-center bg-gray-900 p-6">
+      <View className="items-center space-y-4">
+        <AlertCircle size={48} className="text-red-500" />
+        <Text className="text-center text-lg font-semibold text-white">Camera Error</Text>
+        <Text className="text-center text-white/80">{error}</Text>
+        <Button onPress={onRetry} className="mt-4">
+          <Text>Retry</Text>
+        </Button>
+      </View>
+    </View>
+  );
+};
+
+const CameraPermissionView = ({ onRequestPermission }: { onRequestPermission: () => void }) => {
+  return (
+    <View className="flex-1 items-center justify-center bg-gray-900 p-6">
+      <View className="items-center space-y-4">
+        <AlertCircle size={48} className="text-yellow-500" />
+        <Text className="text-center text-lg font-semibold text-white">Camera Permission Required</Text>
+        <Text className="text-center text-white/80">
+          This app needs camera access to take photos of your targets.
+        </Text>
+        <Button onPress={onRequestPermission} className="mt-4">
+          <Text>Grant Permission</Text>
+        </Button>
+      </View>
     </View>
   );
 };
@@ -85,41 +110,159 @@ export const ActiveGameScreen = ({
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedImageFormat, setCapturedImageFormat] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [isCameraReady, setIsCameraReady] = useState(false);
   const cameraRef = useRef<CameraView>(null);
 
-  const takePicture = async () => {
-    if (cameraRef.current && !isCapturing) {
-      try {
-        setIsCapturing(true);
-        const photo = await cameraRef.current.takePictureAsync({
-          quality: 0.8,
-          base64: false,
-        });
-        setCapturedImage(photo.uri);
-        setCapturedImageFormat(photo.format);
-        setIsShooting(false);
-      } catch (error) {
-        console.error('Error taking picture:', error);
-      } finally {
-        setIsCapturing(false);
+  // Camera permissions
+  const [permission, requestPermission] = useCameraPermissions();
+
+  // Reset camera error when starting camera
+  useEffect(() => {
+    if (isShooting) {
+      setCameraError(null);
+      setIsCameraReady(false);
+    }
+  }, [isShooting]);
+
+  const handleCameraError = (error: any) => {
+    console.error('Camera error:', error);
+    let errorMessage = 'An unknown camera error occurred';
+    
+    if (error?.message) {
+      errorMessage = error.message;
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    }
+    
+    setCameraError(errorMessage);
+    setIsShooting(false);
+  };
+
+  const handleRequestPermission = async () => {
+    try {
+      const result = await requestPermission();
+      if (!result.granted) {
+        Alert.alert(
+          'Permission Required',
+          'Camera permission is required to take photos. Please enable it in your device settings.',
+          [{ text: 'OK' }]
+        );
       }
+    } catch (error) {
+      console.error('Permission request error:', error);
+      Alert.alert('Error', 'Failed to request camera permission');
+    }
+  };
+
+  const handleCameraReady = () => {
+    console.log('Camera is ready');
+    setIsCameraReady(true);
+  };
+
+  const takePicture = async () => {
+    if (!cameraRef.current || isCapturing) return;
+
+    try {
+      setIsCapturing(true);
+      setCameraError(null);
+
+      // Platform-specific camera options for better reliability
+      const cameraOptions = {
+        quality: Platform.OS === 'android' ? 0.7 : 0.8, // Lower quality for Android
+        base64: false,
+        skipProcessing: Platform.OS === 'android', // Skip processing on Android for better performance
+        exif: false, // Disable EXIF to reduce file size
+        ...(Platform.OS === 'android' && {
+          imageType: 'jpg' as const,
+        }),
+      };
+
+      const photo = await cameraRef.current.takePictureAsync(cameraOptions);
+      
+      if (!photo?.uri) {
+        throw new Error('Failed to capture photo');
+      }
+
+      setCapturedImage(photo.uri);
+      setCapturedImageFormat(photo.format || 'jpeg');
+      setIsShooting(false);
+    } catch (error) {
+      handleCameraError(error);
+    } finally {
+      setIsCapturing(false);
     }
   };
 
   const discardPhoto = () => {
     setCapturedImage(null);
+    setCapturedImageFormat(null);
+    setIsShooting(true); // Go back to camera view
   };
 
   const confirmShot = async () => {
-    if (!capturedImage) return;
+    if (!capturedImage || !capturedImageFormat) return;
 
-    const response = await fetch(capturedImage);
-    const blob = await response.blob();
-    const formData = new FormData();
-    formData.append('image', blob, `shot.${capturedImageFormat}`);
-    await api.post(`/game/${gameInfo.code}/player/${target}/shoot`, formData);
+    try {
+      console.log('Starting shot confirmation...');
+      console.log('Game code:', gameInfo.code);
+      console.log('Target ID:', target);
+      console.log('Image format:', capturedImageFormat);
+      
+      // Fetch the image and create a proper File object
+      const response = await fetch(capturedImage);
+      if (!response.ok) {
+        throw new Error('Failed to fetch captured image');
+      }
 
-    setCapturedImage(null);
+      const blob = await response.blob();
+      console.log('Blob size:', blob.size, 'bytes');
+      
+      // Create a proper File object with correct MIME type
+      const mimeType = `image/${capturedImageFormat.toLowerCase()}`;
+      const file = new File([blob], `shot.${capturedImageFormat}`, {
+        type: mimeType,
+        lastModified: Date.now(),
+      });
+      
+      console.log('File created:', file.name, file.type, file.size);
+
+      // Create FormData with the proper File object
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      console.log('FormData created, making API request...');
+
+      // Upload with proper headers
+      const apiResponse = await api.post(`/game/${gameInfo.code}/player/${target}/shoot`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: 30000, // 30 second timeout
+      });
+      
+      console.log('API response:', apiResponse.data);
+
+      setCapturedImage(null);
+      setCapturedImageFormat(null);
+      
+      // Show success feedback
+      Alert.alert('Success', 'Target eliminated!');
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Error message:', error.message);
+      
+      let errorMessage = 'Failed to upload image';
+      if (error?.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      Alert.alert('Upload Failed', errorMessage);
+    }
   };
 
   if (capturedImage) {
@@ -143,16 +286,52 @@ export const ActiveGameScreen = ({
     );
   }
 
+  // Handle permission states
+  if (!permission) {
+    return <LoadingScreen />;
+  }
+
+  if (!permission.granted) {
+    return <CameraPermissionView onRequestPermission={handleRequestPermission} />;
+  }
+
   if (isShooting) {
+    if (cameraError) {
+      return (
+        <CameraErrorView 
+          error={cameraError} 
+          onRetry={() => {
+            setCameraError(null);
+            setIsShooting(false);
+          }} 
+        />
+      );
+    }
+
     return (
       <View className="h-full w-full">
         <CameraView
           ref={cameraRef}
-          facing={Platform.OS === 'web' ? undefined : 'back'}
+          facing={'front'}
           className="h-full w-full"
+          onCameraReady={handleCameraReady}
+          // Android-specific props for better reliability
+          {...(Platform.OS === 'android' && {
+            enableZoomGesture: false,
+            enablePanGesture: false,
+          })}
         />
 
         <TargetOverlay player={currentTarget!} />
+
+        {/* Camera loading indicator */}
+        {!isCameraReady && (
+          <View className="absolute inset-0 items-center justify-center bg-black/50">
+            <View className="rounded-lg bg-black/70 p-4">
+              <Text className="text-white">Initializing camera...</Text>
+            </View>
+          </View>
+        )}
 
         <View className="absolute bottom-10 left-0 right-0 flex-row items-center justify-center gap-4 px-4">
           <TouchableOpacity
@@ -165,9 +344,9 @@ export const ActiveGameScreen = ({
           <View className="rounded-full border-[5px] border-white p-1">
             <TouchableOpacity
               activeOpacity={0.5}
-              className="size-[3rem] rounded-full bg-white"
+              className={`size-[3rem] rounded-full ${isCameraReady ? 'bg-white' : 'bg-gray-400'}`}
               onPress={takePicture}
-              disabled={isCapturing}></TouchableOpacity>
+              disabled={isCapturing || !isCameraReady}></TouchableOpacity>
           </View>
         </View>
       </View>

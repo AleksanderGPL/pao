@@ -3,11 +3,15 @@ import { Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme as useDeviceColorScheme } from 'react-native';
 import 'react-native-reanimated';
+import { enableScreens } from 'react-native-screens';
 import '../global.css';
 import { ThemeProvider } from 'components/ThemeProvider';
 import { checkUserAuth } from '@/lib/auth';
 import { useEffect } from 'react';
 import { useGlobalSearchParams, useSearchParams } from 'expo-router/build/hooks';
+
+// Enable react-native-screens
+enableScreens();
 
 export default function RootLayout() {
   const deviceColorScheme = useDeviceColorScheme();

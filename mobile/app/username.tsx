@@ -44,11 +44,16 @@ export default function UsernameScreen() {
 
     setIsLoading(true);
     try {
-      // Store username in both AsyncStorage and Zustand store
+      console.log('Making registration request...');
+      console.log('API Base URL:', process.env.EXPO_PUBLIC_API_BASE);
+      console.log('Request URL:', `${process.env.EXPO_PUBLIC_API_BASE}/api/auth/register`);
+      console.log('Request payload:', { name: username.trim() });
+      
       const response = await api.post<{ sessionToken: string }>('/auth/register', {
         name: username.trim(),
       });
 
+      console.log('Registration successful:', response.data);
       await setUsernameInStore(Capitalize(username.trim()));
       await AsyncStorage.setItem('sessionToken', response.data.sessionToken);
 
@@ -60,8 +65,23 @@ export default function UsernameScreen() {
       } else {
         router.replace('/(tabs)');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving username:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Error message:', error.message);
+      
+      // Show user-friendly error message
+      if (error.response?.status === 400) {
+        setShowError(true);
+        setTimeout(() => setShowError(false), 3000);
+      } else if (error.response?.status === 500) {
+        setShowError(true);
+        setTimeout(() => setShowError(false), 3000);
+      } else {
+        setShowError(true);
+        setTimeout(() => setShowError(false), 3000);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -94,10 +114,7 @@ export default function UsernameScreen() {
               className={'bg-black/20'}
               onPress={handleContinue}
               disabled={isLoading}>
-              <Text
-                className={
-                  !isValidUsername(username) ? 'font-bold text-muted-foreground text-white' : ''
-                }>
+              <Text className="text-white">
                 {isLoading ? 'Saving...' : 'Continue'}
               </Text>
             </Button>

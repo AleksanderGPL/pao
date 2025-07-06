@@ -94,6 +94,7 @@ app.post(
       return c.json({
         ...game,
         playerId: existingPlayer.id,
+        targetId: existingPlayer.targetId,
       });
     }
 
@@ -284,9 +285,28 @@ app.post(
       return c.json({ error: "Target is already dead" }, 400);
     }
 
+    const eliminatedPlayerTargetId = targetPlayer.targetId;
+
     await db.update(lobbyPlayersTable).set({
       isAlive: false,
     }).where(eq(lobbyPlayersTable.id, playerId));
+
+    if (eliminatedPlayerTargetId) {
+      await db.update(lobbyPlayersTable).set({
+        targetId: eliminatedPlayerTargetId,
+      }).where(eq(lobbyPlayersTable.id, initiatingPlayer.id));
+
+      redis.publish(
+        `game:${game.code}`,
+        JSON.stringify({
+          type: "player_target_assigned",
+          data: {
+            playerId: initiatingPlayer.id,
+            targetId: eliminatedPlayerTargetId,
+          },
+        }),
+      );
+    }
 
     const sharpImage = sharp(await image.arrayBuffer());
     sharpImage.avif({ quality: 50 });
