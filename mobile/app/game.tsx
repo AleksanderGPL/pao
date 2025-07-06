@@ -38,7 +38,7 @@ export default function GameScreen() {
   const [hasStarted, setHasStarted] = useState(false);
   const [isEliminated, setIsEliminated] = useState(false);
   const [currentUser, setCurrentUser] = useState<string>('');
-  const currentUserId = useRef<number | null>(null);
+  const currentPlayerId = useRef<number | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const params = useLocalSearchParams();
   const { username, loadUsername } = useUsernameStore();
@@ -80,7 +80,7 @@ export default function GameScreen() {
         const message = JSON.parse(event.data);
         switch (message.type) {
           case 'player_join':
-            if (message.data.player.id === currentUserId.current) {
+            if (message.data.player.id === currentPlayerId.current) {
               console.log('You joined the game');
               return;
             }
@@ -106,7 +106,7 @@ export default function GameScreen() {
                   )
                 : null
             );
-            if (message.data.playerId === currentUserId.current) {
+            if (message.data.playerId === currentPlayerId.current) {
               setIsEliminated(true);
               console.log('isEliminated', isEliminated);
             }
@@ -124,7 +124,7 @@ export default function GameScreen() {
       const res = await api.post<ApiResponse>(`/game/${params.gameCode}/join`);
       setGameInfo(res.data);
       setPlayers(res.data.players);
-      currentUserId.current = res.data.playerId;
+      currentPlayerId.current = res.data.playerId;
       console.log(res.data.playerId);
       setHasStarted(res.data.status === 'active');
       setHasConnected(true);
