@@ -38,7 +38,7 @@ export interface ApiResponse {
 export default function GameScreen() {
   const [hasConnected, setHasConnected] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
-  const [isEliminated, setIsEliminated] = useState(false);
+  const [isEliminated, setIsEliminated] = useState(true);
   const [hasEnded, setHasEnded] = useState(false);
   const [currentUser, setCurrentUser] = useState<string>('');
   const currentPlayerId = useRef<number | null>(null);
@@ -105,12 +105,12 @@ export default function GameScreen() {
             setPlayers((prev) =>
               prev
                 ? prev.map((player) =>
-                    player.id === message.data.playerId 
-                      ? { 
-                          ...player, 
+                    player.id === message.data.playerId
+                      ? {
+                          ...player,
                           isAlive: false,
-                          shotImageUrl: message.data.shotImageUrl // Add shot image URL if provided
-                        } 
+                          shotImageUrl: message.data.shotImageUrl, // Add shot image URL if provided
+                        }
                       : player
                   )
                 : null
@@ -185,9 +185,18 @@ export default function GameScreen() {
           // Don't set hasStarted to false - stay in the game
           fetchGameData(); // Refresh game data
         }}
+        gameCode={gameInfo!.code}
+        targetId={currentPlayerId}
       />
     );
   }
 
-  return <ActiveGameScreen players={players!} gameInfo={gameInfo!} target={currentTarget!} isEliminated={isEliminated} />;
+  return (
+    <ActiveGameScreen
+      players={players!}
+      gameInfo={gameInfo!}
+      target={currentTarget!}
+      isEliminated={isEliminated}
+    />
+  );
 }
