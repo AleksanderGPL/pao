@@ -200,8 +200,9 @@ export default function HomeScreen() {
                     placeholder="Enter game code"
                     value={gameCode}
                     onChangeText={(text) => {
-                      setGameCode(text);
+                      setGameCode(text.toUpperCase());
                     }}
+                    autoCapitalize="characters"
                     className="w-full py-2 text-sm sm:py-3 sm:text-base rounded-2xl"
                   />
                   <Button
