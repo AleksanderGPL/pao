@@ -38,7 +38,7 @@ export default function GameScreen() {
   const [hasConnected, setHasConnected] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [isEliminated, setIsEliminated] = useState(false);
-  const [hasEnded, setHasEnded] = useState(true);
+  const [hasEnded, setHasEnded] = useState(false);
   const [currentUser, setCurrentUser] = useState<string>('');
   const currentPlayerId = useRef<number | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
