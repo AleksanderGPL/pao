@@ -13,7 +13,7 @@ export default function EliminatedScreen() {
       <ShadowView className="w-full max-w-sm items-center rounded-3xl bg-white p-8">
         <Text className="mb-4 text-6xl">💀</Text>
 
-        <Text className="mb-2 text-center text-3xl font-bold text-red-600">You're Out!</Text>
+        <Text className="mb-2 text-center text-3xl font-bold text-red-600">You&apos;re Out!</Text>
 
         <Text className="mb-8 text-center text-lg text-gray-600">Better luck next time</Text>
 
