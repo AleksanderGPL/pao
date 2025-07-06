@@ -91,7 +91,14 @@ app.post(
     });
 
     if (existingPlayer) {
-      return c.json(game);
+      return c.json({
+        ...game,
+        playerId: existingPlayer.id,
+      });
+    }
+
+    if (game.players.length >= game.maxPlayers) {
+      return c.json({ error: "Game is full" }, 400);
     }
 
     const [player] = await db.insert(lobbyPlayersTable).values({
@@ -121,7 +128,7 @@ app.post(
 
     return c.json({
       ...game,
-      currentUserId: session.user.id,
+      playerId: player.id,
       players: [
         ...game.players,
         newPlayer,
