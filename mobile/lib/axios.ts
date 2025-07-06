@@ -1,6 +1,15 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// S3 configuration for image URLs
+export const S3_BASE_URL = process.env.EXPO_PUBLIC_S3_BASE_URL || 'https://minio.fra1.aleksander.cc';
+export const S3_BUCKET = process.env.EXPO_PUBLIC_S3_BUCKET || 'pao-dev';
+
+// Utility function to construct shot image URLs
+export const getShotImageUrl = (gameCode: string, targetId: number, format: string = 'avif') => {
+  return `${S3_BASE_URL}/${S3_BUCKET}/game/${gameCode}/player/${targetId}/shot.${format}`;
+};
+
 export const api = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_BASE + '/api',
   timeout: 10000, // 10 second timeout

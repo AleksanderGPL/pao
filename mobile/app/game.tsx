@@ -27,6 +27,7 @@ export interface ApiResponse {
     id: number;
     isAlive: boolean;
     isHost: boolean;
+    shotImageUrl?: string; // URL to the elimination shot image
     user: {
       name: string;
       profilePicture: string;
@@ -104,7 +105,13 @@ export default function GameScreen() {
             setPlayers((prev) =>
               prev
                 ? prev.map((player) =>
-                    player.id === message.data.playerId ? { ...player, isAlive: false } : player
+                    player.id === message.data.playerId 
+                      ? { 
+                          ...player, 
+                          isAlive: false,
+                          shotImageUrl: message.data.shotImageUrl // Add shot image URL if provided
+                        } 
+                      : player
                   )
                 : null
             );
@@ -175,12 +182,12 @@ export default function GameScreen() {
       <EliminatedScreen
         onBackToLobby={() => {
           setIsEliminated(false);
-          setHasStarted(false);
+          // Don't set hasStarted to false - stay in the game
           fetchGameData(); // Refresh game data
         }}
       />
     );
   }
 
-  return <ActiveGameScreen players={players!} gameInfo={gameInfo!} target={currentTarget!} />;
+  return <ActiveGameScreen players={players!} gameInfo={gameInfo!} target={currentTarget!} isEliminated={isEliminated} />;
 }

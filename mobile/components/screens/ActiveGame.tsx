@@ -13,12 +13,16 @@ import {
   Pressable,
   Platform,
   Alert,
+  SafeAreaView,
+  Dimensions,
 } from 'react-native';
 import { Button } from '../Button';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import QRCodeStyled from 'react-native-qrcode-styled';
+import * as Clipboard from 'expo-clipboard';
 import type { ApiResponse } from '@/app/game';
-import { api } from '@/lib/axios';
-import { X, AlertCircle } from 'lucide-react-native';
+import { api, getShotImageUrl } from '@/lib/axios';
+import { X, AlertCircle, Camera, Copy, QrCode } from 'lucide-react-native';
 
 const TargetOverlay = ({ player }: { player?: ApiResponse['players'][number] }) => {
   return (
@@ -91,10 +95,12 @@ export const ActiveGameScreen = ({
   players,
   gameInfo,
   target,
+  isEliminated,
 }: {
   players: ApiResponse['players'];
   target: number;
   gameInfo: Omit<ApiResponse, 'players'>;
+  isEliminated: boolean;
 }) => {
   const alivePlayers = players.filter((player) => player.isAlive);
   const eliminatedPlayers = players.filter((player) => !player.isAlive);
@@ -112,7 +118,16 @@ export const ActiveGameScreen = ({
   const [isCapturing, setIsCapturing] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isCameraReady, setIsCameraReady] = useState(false);
+  const [selectedShotImage, setSelectedShotImage] = useState<string | null>(null);
+  const [photoTakenAt, setPhotoTakenAt] = useState<number | null>(null);
+  const [showQRCode, setShowQRCode] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const cameraRef = useRef<CameraView>(null);
+
+  // Get screen dimensions for responsive QR code sizing
+  const { width: screenWidth } = Dimensions.get('window');
+  const qrSize = Math.min(screenWidth - 80, 300); // Responsive size
 
   // Camera permissions
   const [permission, requestPermission] = useCameraPermissions();
@@ -122,8 +137,14 @@ export const ActiveGameScreen = ({
     if (isShooting) {
       setCameraError(null);
       setIsCameraReady(false);
+      
+      // On Android, add extra logging for debugging
+      if (Platform.OS === 'android') {
+        console.log('Starting camera on Android');
+        console.log('Camera permission status:', permission?.granted);
+      }
     }
-  }, [isShooting]);
+  }, [isShooting, permission?.granted]);
 
   const handleCameraError = (error: any) => {
     console.error('Camera error:', error);
@@ -133,6 +154,18 @@ export const ActiveGameScreen = ({
       errorMessage = error.message;
     } else if (typeof error === 'string') {
       errorMessage = error;
+    }
+    
+    // Android-specific error handling
+    if (Platform.OS === 'android') {
+      console.log('Android camera error detected');
+      // On Android, sometimes the camera preview doesn't show but still works
+      // Let's try to continue anyway
+      if (errorMessage.includes('preview') || errorMessage.includes('display')) {
+        console.log('Android preview issue detected, continuing anyway');
+        setIsCameraReady(true);
+        return;
+      }
     }
     
     setCameraError(errorMessage);
@@ -157,7 +190,11 @@ export const ActiveGameScreen = ({
 
   const handleCameraReady = () => {
     console.log('Camera is ready');
-    setIsCameraReady(true);
+    // Add a longer delay on Android to ensure camera preview is fully rendered
+    const delay = Platform.OS === 'android' ? 500 : 100;
+    setTimeout(() => {
+      setIsCameraReady(true);
+    }, delay);
   };
 
   const takePicture = async () => {
@@ -167,14 +204,16 @@ export const ActiveGameScreen = ({
       setIsCapturing(true);
       setCameraError(null);
 
-      // Platform-specific camera options for better reliability
+      // Optimized camera options for faster uploads
       const cameraOptions = {
-        quality: Platform.OS === 'android' ? 0.7 : 0.8, // Lower quality for Android
+        quality: 0.6, // Lower quality for faster uploads
         base64: false,
-        skipProcessing: Platform.OS === 'android', // Skip processing on Android for better performance
+        skipProcessing: true, // Skip processing for better performance
         exif: false, // Disable EXIF to reduce file size
+        imageType: 'jpg' as const, // Use JPEG for smaller file size
         ...(Platform.OS === 'android' && {
-          imageType: 'jpg' as const,
+          // Android-specific optimizations
+          skipProcessing: true,
         }),
       };
 
@@ -186,6 +225,7 @@ export const ActiveGameScreen = ({
 
       setCapturedImage(photo.uri);
       setCapturedImageFormat(photo.format || 'jpeg');
+      setPhotoTakenAt(Date.now());
       setIsShooting(false);
     } catch (error) {
       handleCameraError(error);
@@ -197,54 +237,99 @@ export const ActiveGameScreen = ({
   const discardPhoto = () => {
     setCapturedImage(null);
     setCapturedImageFormat(null);
+    setPhotoTakenAt(null);
     setIsShooting(true); // Go back to camera view
   };
 
+  const copyGameCode = async () => {
+    try {
+      await Clipboard.setStringAsync(gameInfo.code);
+      Alert.alert('Copied!', 'Game code copied to clipboard');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to copy game code');
+    }
+  };
+
   const confirmShot = async () => {
-    if (!capturedImage || !capturedImageFormat) return;
+    if (!capturedImage || !capturedImageFormat || isUploading) return;
+
+    // Validate that we still have the same target
+    if (!target || !currentTarget) {
+      Alert.alert('Error', 'No target assigned. Please refresh the game.');
+      return;
+    }
+
+    // Double-check that the current target matches what we're trying to shoot
+    if (currentTarget.id !== target) {
+      Alert.alert('Error', 'Target has changed. Please take a new photo.');
+      setCapturedImage(null);
+      setCapturedImageFormat(null);
+      setPhotoTakenAt(null);
+      return;
+    }
+
+    // Check if the photo is too old (more than 5 minutes)
+    if (photoTakenAt && Date.now() - photoTakenAt > 5 * 60 * 1000) {
+      Alert.alert('Error', 'Photo is too old. Please take a new photo.');
+      setCapturedImage(null);
+      setCapturedImageFormat(null);
+      setPhotoTakenAt(null);
+      return;
+    }
+
+    // Start upload process
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    // Simulate progress updates
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 90) return prev;
+        return prev + Math.random() * 10;
+      });
+    }, 200);
 
     try {
       console.log('Starting shot confirmation...');
       console.log('Game code:', gameInfo.code);
-      console.log('Target ID:', target);
+      console.log('Current target ID:', target);
+      console.log('Current target name:', currentTarget.user.name);
+      console.log('Photo taken at:', photoTakenAt ? new Date(photoTakenAt).toISOString() : 'unknown');
       console.log('Image format:', capturedImageFormat);
       
-      // Fetch the image and create a proper File object
-      const response = await fetch(capturedImage);
-      if (!response.ok) {
-        throw new Error('Failed to fetch captured image');
-      }
-
-      const blob = await response.blob();
-      console.log('Blob size:', blob.size, 'bytes');
-      
-      // Create a proper File object with correct MIME type
-      const mimeType = `image/${capturedImageFormat.toLowerCase()}`;
-      const file = new File([blob], `shot.${capturedImageFormat}`, {
-        type: mimeType,
-        lastModified: Date.now(),
-      });
-      
-      console.log('File created:', file.name, file.type, file.size);
-
-      // Create FormData with the proper File object
+      // For React Native, we need to handle FormData differently
       const formData = new FormData();
-      formData.append('image', file);
+      
+      // Create the file object for React Native
+      const fileUri = capturedImage;
+      const fileName = `shot.${capturedImageFormat}`;
+      const mimeType = `image/${capturedImageFormat.toLowerCase()}`;
+      
+      formData.append('image', {
+        uri: fileUri,
+        type: mimeType,
+        name: fileName,
+      } as any);
       
       console.log('FormData created, making API request...');
 
-      // Upload with proper headers
+      // Upload with optimized settings
       const apiResponse = await api.post(`/game/${gameInfo.code}/player/${target}/shoot`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 30000, // 30 second timeout
+        timeout: 30000, // 30 second timeout (reduced for better UX)
       });
       
       console.log('API response:', apiResponse.data);
 
+      // Complete progress
+      setUploadProgress(100);
+      
+      // Clear the photo data
       setCapturedImage(null);
       setCapturedImageFormat(null);
+      setPhotoTakenAt(null);
       
       // Show success feedback
       Alert.alert('Success', 'Target eliminated!');
@@ -262,6 +347,11 @@ export const ActiveGameScreen = ({
       }
       
       Alert.alert('Upload Failed', errorMessage);
+    } finally {
+      // Clean up
+      clearInterval(progressInterval);
+      setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -274,12 +364,39 @@ export const ActiveGameScreen = ({
           style={{ transform: [{ scaleX: -1 }] }}
         />
         <TargetOverlay player={currentTarget!} />
+        
+        {/* Upload Progress Overlay */}
+        {isUploading && (
+          <View className="absolute inset-0 bg-black/50 items-center justify-center">
+            <View className="bg-white rounded-lg p-6 m-4 max-w-sm w-full">
+              <Text className="text-center text-lg font-semibold mb-4">Uploading Shot...</Text>
+              <View className="bg-gray-200 rounded-full h-2 mb-4">
+                <View 
+                  className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </View>
+              <Text className="text-center text-sm text-gray-600">
+                {Math.round(uploadProgress)}% Complete
+              </Text>
+            </View>
+          </View>
+        )}
+        
         <View className="absolute bottom-10 left-0 right-0 flex-row justify-center gap-4 px-4">
-          <Button className="flex-1 bg-red-500" onPress={discardPhoto}>
+          <Button 
+            className="flex-1 bg-red-500" 
+            onPress={discardPhoto}
+            disabled={isUploading}
+          >
             <Text>Discard</Text>
           </Button>
-          <Button className="flex-1 bg-green-500" onPress={confirmShot}>
-            <Text>Confirm Shot</Text>
+          <Button 
+            className={`flex-1 ${isUploading ? 'bg-gray-400' : 'bg-green-500'}`} 
+            onPress={confirmShot}
+            disabled={isUploading}
+          >
+            <Text>{isUploading ? 'Uploading...' : 'Confirm Shot'}</Text>
           </Button>
         </View>
       </>
@@ -309,26 +426,24 @@ export const ActiveGameScreen = ({
     }
 
     return (
-      <View className="h-full w-full">
+      <View className="h-full w-full" style={{ backgroundColor: 'black' }}>
         <CameraView
           ref={cameraRef}
-          facing={'front'}
+          facing='front'
           className="h-full w-full"
           onCameraReady={handleCameraReady}
-          // Android-specific props for better reliability
-          {...(Platform.OS === 'android' && {
-            enableZoomGesture: false,
-            enablePanGesture: false,
-          })}
+          style={{ flex: 1, width: '100%', height: '100%' }}
         />
 
         <TargetOverlay player={currentTarget!} />
 
         {/* Camera loading indicator */}
         {!isCameraReady && (
-          <View className="absolute inset-0 items-center justify-center bg-black/50">
-            <View className="rounded-lg bg-black/70 p-4">
-              <Text className="text-white">Initializing camera...</Text>
+          <View className="absolute inset-0 items-center justify-center bg-black/20">
+            <View className="rounded-lg bg-black/80 p-4">
+              <Text className="text-white">
+                {Platform.OS === 'android' ? 'Initializing camera on Android...' : 'Initializing camera...'}
+              </Text>
             </View>
           </View>
         )}
@@ -354,11 +469,34 @@ export const ActiveGameScreen = ({
   }
 
   return (
-    <>
+    <SafeAreaView className="flex-1" style={{ backgroundColor: 'white' }}>
+      {/* Shot Image Modal */}
+      <Modal
+        visible={!!selectedShotImage}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setSelectedShotImage(null)}
+      >
+        <View className="flex-1 bg-black/90 items-center justify-center">
+          <TouchableOpacity
+            className="absolute top-12 right-4 z-10"
+            onPress={() => setSelectedShotImage(null)}
+          >
+            <X size={24} className="text-white" />
+          </TouchableOpacity>
+          {selectedShotImage && (
+            <Image
+              source={{ uri: selectedShotImage }}
+              className="w-full h-3/4"
+              resizeMode="contain"
+            />
+          )}
+        </View>
+      </Modal>
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="p-5 pt-8">
+        contentContainerClassName={`p-5 ${Platform.OS === 'android' ? 'pt-4' : 'pt-8'}`}>
         {/* Game Header */}
         <Card className="mb-4">
           <CardHeader>
@@ -370,9 +508,72 @@ export const ActiveGameScreen = ({
           </CardHeader>
         </Card>
 
-        <Button className="mb-4" onPress={() => setIsShooting(true)}>
-          <Text>Shoot Target</Text>
+        {/* QR Code Section */}
+        <Card className="mb-4">
+            {showQRCode ? (
+              <View className="items-center space-y-4">
+                <View className="rounded-lg bg-white p-4">
+                  <QRCodeStyled
+                    data={process.env.EXPO_PUBLIC_DEPLOY_LINK + '?gameCode=' + gameInfo.code}
+                    className="aspect-square"
+                    padding={20}
+                    pieceSize={6}
+                    style={{
+                      width: qrSize,
+                      height: qrSize,
+                    }}
+                  />
+                </View>
+                <Button
+                  variant="outline"
+                  onPress={copyGameCode}
+                  className="flex-row items-center gap-2">
+                  <Text className="font-mono text-lg font-medium">{gameInfo.code}</Text>
+                  <Copy size={18} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  onPress={() => setShowQRCode(false)}
+                  className="mt-2">
+                  <Text>Hide QR Code</Text>
+                </Button>
+              </View>
+            ) : (
+              <Button
+                variant="outline"
+                onPress={() => setShowQRCode(true)}
+                className="flex-row items-center gap-2">
+                <QrCode size={18} />
+                <Text>Show QR Code</Text>
+              </Button>
+            )}
+        </Card>
+
+        <Button 
+          className={`mb-4 ${isEliminated ? 'bg-gray-400' : ''}`} 
+          onPress={() => setIsShooting(true)}
+          disabled={isEliminated || isUploading}
+        >
+          <Text className={isEliminated ? 'text-gray-600' : ''}>
+            {isEliminated ? 'Eliminated' : isUploading ? 'Uploading...' : 'Shoot Target'}
+          </Text>
         </Button>
+        
+        {/* Upload Status Indicator */}
+        {isUploading && (
+          <View className="mb-4 rounded-lg bg-blue-50 border border-blue-200 p-3">
+            <View className="flex-row items-center gap-2">
+              <View className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+              <Text className="text-blue-700 font-medium">Uploading elimination shot...</Text>
+            </View>
+            <View className="mt-2 bg-blue-100 rounded-full h-1">
+              <View 
+                className="bg-blue-500 h-1 rounded-full transition-all duration-300"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </View>
+          </View>
+        )}
 
         {/* Current Target */}
         <Card className="mb-4">
@@ -466,25 +667,47 @@ export const ActiveGameScreen = ({
             </CardHeader>
             <CardContent>
               <View className="space-y-3">
-                {eliminatedPlayers.map((player, index) => (
-                  <View key={index} className="flex-row items-center space-x-3 opacity-60">
-                    <Avatar alt={`${player.user.name} profile picture`}>
-                      <AvatarImage source={{ uri: player.user.profilePicture }} />
-                      <AvatarFallback>
-                        <Text className="font-semibold">{player.user.name.charAt(0)}</Text>
-                      </AvatarFallback>
-                    </Avatar>
-                    <View className="flex-1">
-                      <Text className="font-medium line-through">{player.user.name}</Text>
-                      <Text className="text-sm text-red-600">Eliminated</Text>
+                {eliminatedPlayers.map((player, index) => {
+                  // Construct shot image URL if not provided
+                  const shotImageUrl = player.shotImageUrl || getShotImageUrl(gameInfo.code, player.id);
+                  
+                  return (
+                    <View key={index} className="flex-row items-center space-x-3 opacity-60">
+                      <Avatar alt={`${player.user.name} profile picture`}>
+                        <AvatarImage source={{ uri: player.user.profilePicture }} />
+                        <AvatarFallback>
+                          <Text className="font-semibold">{player.user.name.charAt(0)}</Text>
+                        </AvatarFallback>
+                      </Avatar>
+                      <View className="flex-1">
+                        <Text className="font-medium line-through">{player.user.name}</Text>
+                        <Text className="text-sm text-red-600">Eliminated</Text>
+                      </View>
+                      {/* Shot Image */}
+                      <TouchableOpacity
+                        activeOpacity={0.7}
+                        onPress={() => setSelectedShotImage(shotImageUrl)}
+                      >
+                        <View className="h-12 w-12 rounded-lg border border-gray-300 bg-gray-100 items-center justify-center overflow-hidden">
+                          <Image
+                            source={{ uri: shotImageUrl }}
+                            className="h-full w-full"
+                            resizeMode="cover"
+                            onError={() => {
+                              // Fallback to camera icon if image fails to load
+                              console.log('Failed to load shot image:', shotImageUrl);
+                            }}
+                          />
+                        </View>
+                      </TouchableOpacity>
                     </View>
-                  </View>
-                ))}
+                  );
+                })}
               </View>
             </CardContent>
           </Card>
         )}
       </ScrollView>
-    </>
+    </SafeAreaView>
   );
 };
