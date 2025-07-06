@@ -69,15 +69,15 @@ export const WinScreen = () => {
 
       {/* Podium Layout */}
       <View className="flex-1 justify-center">
-        <View className="mb-8 flex-row items-end justify-center space-x-1">
+        <View className="mb-8 flex-row items-end justify-center gap-2">
           {/* 2nd Place */}
           <View className="flex-1">
-            <ShadowView className="mb-4 items-center bg-card py-4" shadowSize="lg">
+            <ShadowView className="mb-4 items-center rounded-lg bg-card py-4" shadowSize="lg">
               <View
                 className={`h-8 w-8 rounded-full ${getRankColor(2)} mb-3 items-center justify-center`}>
                 <Text className="text-sm font-bold text-white">2</Text>
               </View>
-              <Avatar className="mb-3 h-16 w-16" alt={`${topPlayers[1].name} avatar`}>
+              <Avatar className="mb-3 size-14" alt={`${topPlayers[1].name} avatar`}>
                 {topPlayers[1].avatar && <AvatarImage source={{ uri: topPlayers[1].avatar }} />}
                 <AvatarFallback>
                   <Text className="text-lg font-semibold">{topPlayers[1].initials}</Text>
@@ -90,18 +90,18 @@ export const WinScreen = () => {
                 </Text>
               </CardContent>
             </ShadowView>
-            <View className="h-20 w-20 rounded-t-lg bg-gray-400" />
+            <View className="h-20 w-20 self-center rounded-t-lg bg-gray-400" />
           </View>
 
           {/* 1st Place */}
           <View className="flex-1">
-            <ShadowView className="mb-4 items-center bg-card py-4" shadowSize="2xl">
+            <ShadowView className="mb-4 items-center rounded-lg bg-card py-4" shadowSize="2xl">
               <View
                 className={`h-10 w-10 rounded-full ${getRankColor(1)} mb-4 items-center justify-center`}>
                 <Text className="text-lg font-bold text-white">1</Text>
               </View>
               <Text className="mb-2 text-2xl">{getRankIcon(1)}</Text>
-              <Avatar className="mb-4 h-20 w-20" alt={`${topPlayers[0].name} avatar`}>
+              <Avatar className="mb-4 size-16" alt={`${topPlayers[0].name} avatar`}>
                 {topPlayers[0].avatar && <AvatarImage source={{ uri: topPlayers[0].avatar }} />}
                 <AvatarFallback>
                   <Text className="text-xl font-semibold">{topPlayers[0].initials}</Text>
@@ -114,17 +114,17 @@ export const WinScreen = () => {
                 </Text>
               </CardContent>
             </ShadowView>
-            <View className="h-28 w-24 rounded-t-lg bg-yellow-500" />
+            <View className="h-28 w-24 self-center rounded-t-lg bg-yellow-500" />
           </View>
 
           {/* 3rd Place */}
           <View className="flex-1">
-            <ShadowView className="mb-4 items-center bg-card py-4" shadowSize="lg">
+            <ShadowView className="mb-4 items-center rounded-lg bg-card py-4" shadowSize="lg">
               <View
                 className={`h-8 w-8 rounded-full ${getRankColor(3)} mb-3 items-center justify-center`}>
                 <Text className="text-sm font-bold text-white">3</Text>
               </View>
-              <Avatar className="mb-3 h-16 w-16" alt={`${topPlayers[2].name} avatar`}>
+              <Avatar className="mb-3 size-14" alt={`${topPlayers[2].name} avatar`}>
                 {topPlayers[2].avatar && <AvatarImage source={{ uri: topPlayers[2].avatar }} />}
                 <AvatarFallback>
                   <Text className="text-lg font-semibold">{topPlayers[2].initials}</Text>
@@ -137,7 +137,7 @@ export const WinScreen = () => {
                 </Text>
               </CardContent>
             </ShadowView>
-            <View className="h-16 w-16 rounded-t-lg bg-amber-600" />
+            <View className="h-16 w-16 self-center rounded-t-lg bg-amber-600" />
           </View>
         </View>
 
