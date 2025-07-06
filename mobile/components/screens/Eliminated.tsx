@@ -60,7 +60,7 @@ export default function EliminatedScreen({
         )}
 
         <Button onPress={handleBackToLobby} className="w-full">
-          <Text>Back to Lobby</Text>
+          <Text>Watch Game</Text>
         </Button>
       </ShadowView>
     </View>

@@ -96,14 +96,21 @@ export const ActiveGameScreen = ({
   gameInfo,
   target,
   isEliminated,
+  currentPlayerId,
 }: {
   players: ApiResponse['players'];
   target: number;
   gameInfo: Omit<ApiResponse, 'players'>;
   isEliminated: boolean;
+  currentPlayerId: number | null;
 }) => {
   const alivePlayers = players.filter((player) => player.isAlive);
   const eliminatedPlayers = players.filter((player) => !player.isAlive);
+  
+  // Check if current player is actually alive
+  const currentPlayer = players.find((p) => p.id === currentPlayerId);
+  const isPlayerAlive = currentPlayer?.isAlive ?? false;
+  
   const formatTimeRemaining = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -277,7 +284,38 @@ export const ActiveGameScreen = ({
       return;
     }
 
-    // Start upload process
+    // Store the data for background upload
+    const uploadData = {
+      imageUri: capturedImage,
+      imageFormat: capturedImageFormat,
+      gameCode: gameInfo.code,
+      targetId: target,
+      targetName: currentTarget.user.name,
+      photoTakenAt: photoTakenAt,
+    };
+
+    // Clear the photo data immediately for instant feedback
+    setCapturedImage(null);
+    setCapturedImageFormat(null);
+    setPhotoTakenAt(null);
+
+    // Show instant success feedback
+    Alert.alert('Target Eliminated!', `${currentTarget.user.name} has been eliminated!`, [
+      { text: 'OK' }
+    ]);
+
+    // Start background upload
+    uploadShotInBackground(uploadData);
+  };
+
+  const uploadShotInBackground = async (uploadData: {
+    imageUri: string;
+    imageFormat: string;
+    gameCode: string;
+    targetId: number;
+    targetName: string;
+    photoTakenAt: number | null;
+  }) => {
     setIsUploading(true);
     setUploadProgress(0);
 
@@ -290,20 +328,20 @@ export const ActiveGameScreen = ({
     }, 200);
 
     try {
-      console.log('Starting shot confirmation...');
-      console.log('Game code:', gameInfo.code);
-      console.log('Current target ID:', target);
-      console.log('Current target name:', currentTarget.user.name);
-      console.log('Photo taken at:', photoTakenAt ? new Date(photoTakenAt).toISOString() : 'unknown');
-      console.log('Image format:', capturedImageFormat);
+      console.log('Starting background upload...');
+      console.log('Game code:', uploadData.gameCode);
+      console.log('Target ID:', uploadData.targetId);
+      console.log('Target name:', uploadData.targetName);
+      console.log('Photo taken at:', uploadData.photoTakenAt ? new Date(uploadData.photoTakenAt).toISOString() : 'unknown');
+      console.log('Image format:', uploadData.imageFormat);
       
       // For React Native, we need to handle FormData differently
       const formData = new FormData();
       
       // Create the file object for React Native
-      const fileUri = capturedImage;
-      const fileName = `shot.${capturedImageFormat}`;
-      const mimeType = `image/${capturedImageFormat.toLowerCase()}`;
+      const fileUri = uploadData.imageUri;
+      const fileName = `shot.${uploadData.imageFormat}`;
+      const mimeType = `image/${uploadData.imageFormat.toLowerCase()}`;
       
       formData.append('image', {
         uri: fileUri,
@@ -314,39 +352,39 @@ export const ActiveGameScreen = ({
       console.log('FormData created, making API request...');
 
       // Upload with optimized settings
-      const apiResponse = await api.post(`/game/${gameInfo.code}/player/${target}/shoot`, formData, {
+      const apiResponse = await api.post(`/game/${uploadData.gameCode}/player/${uploadData.targetId}/shoot`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 30000, // 30 second timeout (reduced for better UX)
+        timeout: 30000, // 30 second timeout
       });
       
-      console.log('API response:', apiResponse.data);
+      console.log('Background upload successful:', apiResponse.data);
 
       // Complete progress
       setUploadProgress(100);
       
-      // Clear the photo data
-      setCapturedImage(null);
-      setCapturedImageFormat(null);
-      setPhotoTakenAt(null);
+      // Show subtle success notification
+      setTimeout(() => {
+        // You could show a toast notification here instead of alert
+        console.log('Shot uploaded successfully in background');
+      }, 1000);
       
-      // Show success feedback
-      Alert.alert('Success', 'Target eliminated!');
     } catch (error: any) {
-      console.error('Upload error:', error);
+      console.error('Background upload error:', error);
       console.error('Error response:', error.response?.data);
       console.error('Error status:', error.response?.status);
       console.error('Error message:', error.message);
       
-      let errorMessage = 'Failed to upload image';
-      if (error?.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      }
+      // Show error notification without blocking the UI
+      setTimeout(() => {
+        Alert.alert(
+          'Upload Failed', 
+          'The elimination was successful, but the shot image failed to upload. The game will continue normally.',
+          [{ text: 'OK' }]
+        );
+      }, 1000);
       
-      Alert.alert('Upload Failed', errorMessage);
     } finally {
       // Clean up
       clearInterval(progressInterval);
@@ -364,24 +402,6 @@ export const ActiveGameScreen = ({
           style={{ transform: [{ scaleX: -1 }] }}
         />
         <TargetOverlay player={currentTarget!} />
-        
-        {/* Upload Progress Overlay */}
-        {isUploading && (
-          <View className="absolute inset-0 bg-black/50 items-center justify-center">
-            <View className="bg-white rounded-lg p-6 m-4 max-w-sm w-full">
-              <Text className="text-center text-lg font-semibold mb-4">Uploading Shot...</Text>
-              <View className="bg-gray-200 rounded-full h-2 mb-4">
-                <View 
-                  className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${uploadProgress}%` }}
-                />
-              </View>
-              <Text className="text-center text-sm text-gray-600">
-                {Math.round(uploadProgress)}% Complete
-              </Text>
-            </View>
-          </View>
-        )}
         
         <View className="absolute bottom-10 left-0 right-0 flex-row justify-center gap-4 px-4">
           <Button 
@@ -549,26 +569,32 @@ export const ActiveGameScreen = ({
             )}
         </Card>
 
+        {/* Shoot Target button - only shown to alive players */}
         <Button 
-          className={`mb-4 ${isEliminated ? 'bg-gray-400' : ''}`} 
+          className="mb-4" 
           onPress={() => setIsShooting(true)}
-          disabled={isEliminated || isUploading}
+          disabled={isUploading}
         >
-          <Text className={isEliminated ? 'text-gray-600' : ''}>
-            {isEliminated ? 'Eliminated' : isUploading ? 'Uploading...' : 'Shoot Target'}
+          <Text>
+            {isUploading ? 'Uploading...' : 'Shoot Target'}
           </Text>
         </Button>
         
-        {/* Upload Status Indicator */}
+        {/* Background Upload Status Indicator */}
         {isUploading && (
-          <View className="mb-4 rounded-lg bg-blue-50 border border-blue-200 p-3">
-            <View className="flex-row items-center gap-2">
-              <View className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-              <Text className="text-blue-700 font-medium">Uploading elimination shot...</Text>
+          <View className="mb-4 rounded-lg bg-green-50 border border-green-200 p-2">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2">
+                <View className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <Text className="text-green-700 text-sm">Uploading shot image...</Text>
+              </View>
+              <Text className="text-green-600 text-xs font-medium">
+                {Math.round(uploadProgress)}%
+              </Text>
             </View>
-            <View className="mt-2 bg-blue-100 rounded-full h-1">
+            <View className="mt-1 bg-green-100 rounded-full h-1">
               <View 
-                className="bg-blue-500 h-1 rounded-full transition-all duration-300"
+                className="bg-green-500 h-1 rounded-full transition-all duration-300"
                 style={{ width: `${uploadProgress}%` }}
               />
             </View>
