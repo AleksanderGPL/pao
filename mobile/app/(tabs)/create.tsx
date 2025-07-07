@@ -83,7 +83,7 @@ export default function CreateGameScreen() {
   };
 
   return (
-    <View className="h-full flex-1 p-5 pt-8">
+    <View className="h-full flex-1 bg-background p-5 pt-8">
       {/* Back Button */}
       <View className="mb-4">
         <BackButton onPress={() => router.replace('/username')} />
