@@ -2,7 +2,8 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // S3 configuration for image URLs
-export const S3_BASE_URL = process.env.EXPO_PUBLIC_S3_BASE_URL || 'https://minio.fra1.aleksander.cc';
+export const S3_BASE_URL =
+  process.env.EXPO_PUBLIC_S3_BASE_URL || 'https://minio.fra1.aleksander.cc';
 export const S3_BUCKET = process.env.EXPO_PUBLIC_S3_BUCKET || 'pao-dev';
 
 // Utility function to construct shot image URLs
@@ -19,7 +20,7 @@ api.interceptors.request.use(
   async (config) => {
     console.log('Axios request:', config.method?.toUpperCase(), config.url);
     console.log('Request headers:', config.headers);
-    
+
     // Don't add Authorization header for auth endpoints (register, login)
     if (config.url?.includes('/auth/register') || config.url?.includes('/auth/login')) {
       console.log('Skipping Authorization header for auth endpoint');

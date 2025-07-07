@@ -129,7 +129,6 @@ export default function HomeScreen() {
                     style={{
                       position: 'absolute',
                       width: '100%',
-                      height: '100%',
 
                       borderRadius: 24,
                       overflow: 'hidden',
@@ -172,7 +171,6 @@ export default function HomeScreen() {
                         key={cameraKey}
                         style={{
                           width: '100%',
-                          height: '100%',
                           aspectRatio: 0.8,
                           borderRadius: 24,
                           overflow: 'hidden',

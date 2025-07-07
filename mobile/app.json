@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "my-expo-app",
-    "slug": "my-expo-app",
+    "name": "pao",
+    "slug": "pao",
     "version": "1.0.0",
     "scheme": "pao",
     "web": {

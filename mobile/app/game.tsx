@@ -201,7 +201,7 @@ export default function GameScreen() {
           currentPlayerId={currentPlayerId}
         />
       ) : hasEnded ? (
-        <WinScreen leaderBoard={hasEnded} />
+        <WinScreen leaderBoard={hasEnded} players={players!} gameCode={gameInfo!.code} />
       ) : isEliminated || isPlayerEliminated ? (
         isEliminated ? (
           <EliminatedScreen

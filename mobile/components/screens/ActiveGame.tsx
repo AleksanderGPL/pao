@@ -23,7 +23,6 @@ import * as Clipboard from 'expo-clipboard';
 import type { ApiResponse } from '@/app/game';
 import { api, getShotImageUrl } from '@/lib/axios';
 import { X, AlertCircle, Camera, Copy, QrCode } from 'lucide-react-native';
-import { getBlobFroUri } from '@/lib/utils';
 
 const TargetOverlay = ({ player }: { player?: ApiResponse['players'][number] }) => {
   return (
@@ -341,36 +340,35 @@ export const ActiveGameScreen = ({
       );
       console.log('Image format:', uploadData.imageFormat);
 
-      // For React Native, we need to handle FormData differently
+      // Create FormData for image upload
       const formData = new FormData();
-
-      // Create the file object for React Native
-      const fileUri = uploadData.imageUri;
       const fileName = `shot.${uploadData.imageFormat}`;
       const mimeType = `image/${uploadData.imageFormat.toLowerCase()}`;
-      let blob = null;
+
       if (Platform.OS === 'web') {
-        const response = await fetch(fileUri);
-        blob = await response.blob();
+        // Web platform: use File object
+        const response = await fetch(uploadData.imageUri);
+        if (!response.ok) {
+          throw new Error('Failed to fetch captured image');
+        }
+        const blob = await response.blob();
+        console.log('Blob size:', blob.size, 'bytes');
+
+        const file = new File([blob], fileName, {
+          type: mimeType,
+          lastModified: Date.now(),
+        });
+        console.log('File created:', file.name, file.type, file.size);
+        formData.append('image', file);
       } else {
-        blob = await getBlobFroUri(fileUri);
+        // React Native: append URI directly with metadata
+        formData.append('image', {
+          uri: uploadData.imageUri,
+          type: mimeType,
+          name: fileName,
+        } as any);
+        console.log('FormData created for React Native with URI:', uploadData.imageUri);
       }
-
-      const response = await fetch(uploadData.imageUri);
-      if (!response.ok) {
-        throw new Error('Failed to fetch captured image');
-      }
-
-      console.log('Blob size:', blob!.size, 'bytes');
-
-      const file = new File([blob!], `shot.${capturedImageFormat}`, {
-        type: mimeType,
-        lastModified: Date.now(),
-      });
-
-      console.log('File created:', file.name, file.type, file.size);
-
-      formData.append('image', file);
 
       console.log('FormData created, making API request...');
 
@@ -406,7 +404,8 @@ export const ActiveGameScreen = ({
       setTimeout(() => {
         Alert.alert(
           'Upload Failed',
-          'The elimination was successful, but the shot image failed to upload. The game will continue normally.',
+          'The elimination was successful, but the shot image failed to upload. The game will continue normally. error: ' +
+            error.message,
           [{ text: 'OK' }]
         );
       }, 1000);

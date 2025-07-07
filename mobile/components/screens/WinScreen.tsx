@@ -3,6 +3,9 @@ import { Card, CardContent } from '../Card';
 import { Text } from '../Text';
 import { Avatar, AvatarFallback, AvatarImage } from '../Avatar';
 import { ShadowView } from '../base/ShadowView';
+import { ScrollView } from 'react-native';
+import { Image } from 'expo-image';
+import { getShotImageUrl } from '@/lib/axios';
 
 const getRankColor = (rank: number) => {
   switch (rank) {
@@ -30,7 +33,15 @@ const getRankIcon = (rank: number) => {
   }
 };
 
-export const WinScreen = ({ leaderBoard }: { leaderBoard: { name: string; kills: number }[] }) => {
+export const WinScreen = ({
+  leaderBoard,
+  players,
+  gameCode,
+}: {
+  leaderBoard: { name: string; kills: number }[];
+  players: { id: number; user: { name: string }; isAlive: boolean }[];
+  gameCode: string;
+}) => {
   const topPlayers = leaderBoard
     .sort((a, b) => b.kills - a.kills)
     .slice(0, 3)
@@ -45,7 +56,7 @@ export const WinScreen = ({ leaderBoard }: { leaderBoard: { name: string; kills:
       rank: index + 1,
     }));
   return (
-    <View className="flex-1 bg-background px-6 py-8">
+    <ScrollView contentContainerClassName="flex-1 bg-background py-8 items-center">
       {/* Header */}
       <View className="mb-8 items-center">
         <Text className="mb-2 text-3xl font-bold text-foreground">Game Complete!</Text>
@@ -53,8 +64,8 @@ export const WinScreen = ({ leaderBoard }: { leaderBoard: { name: string; kills:
       </View>
 
       {/* Podium Layout */}
-      <View className="flex-1 justify-center">
-        <View className="mb-8 flex-row items-end justify-center gap-2">
+      <View className="w-full max-w-md justify-center px-4">
+        <View className="flex-row items-end justify-center gap-2">
           {/* 2nd Place */}
           <View className="flex-1">
             <ShadowView className="mb-4 items-center rounded-lg bg-card py-4" shadowSize="lg">
@@ -124,21 +135,35 @@ export const WinScreen = ({ leaderBoard }: { leaderBoard: { name: string; kills:
         </View>
 
         {/* Congratulations Message */}
-        <View className="mt-8 items-center">
-          <ShadowView shadowSize="lg">
-            <Card className="bg-card px-8 py-6">
-              <CardContent className="items-center">
-                <Text className="mb-2 text-center text-xl font-bold text-foreground">
-                  🎉 Congratulations! 🎉
-                </Text>
-                <Text className="text-center text-base text-muted-foreground">
-                  Thanks for playing!
-                </Text>
-              </CardContent>
-            </Card>
-          </ShadowView>
-        </View>
       </View>
-    </View>
+      <ShadowView shadowSize="lg" className="w-full bg-card py-6">
+        <CardContent className="items-center">
+          <Text className="mb-2 text-center text-xl font-bold text-foreground">
+            🎉 Congratulations! 🎉
+          </Text>
+          <Text className="text-center text-base text-muted-foreground">Thanks for playing!</Text>
+        </CardContent>
+        <View className="m-4 mb-6 w-full max-w-md gap-4 self-center px-4">
+          {players
+            .filter((player) => !player.isAlive)
+            .map((player) => (
+              <View key={player.id} className="relative">
+                <Image
+                  source={getShotImageUrl(gameCode, player.id)}
+                  className="w-full rounded-2xl"
+                  contentFit="cover"
+                  style={{ aspectRatio: 0.8 }}
+                />
+                {/* Name Overlay */}
+                <View className="absolute bottom-2 left-2 right-2 rounded-xl bg-black/50 px-4 py-2">
+                  <Text className="text-center text-lg font-semibold text-white">
+                    {player.user.name}
+                  </Text>
+                </View>
+              </View>
+            ))}
+        </View>
+      </ShadowView>
+    </ScrollView>
   );
 };
