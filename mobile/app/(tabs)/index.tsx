@@ -123,8 +123,8 @@ export default function HomeScreen() {
               <View className="flex w-full flex-col items-stretch justify-center gap-4 lg:flex-row lg:items-start lg:gap-8">
                 {/* Camera View */}
                 <View
-                  className="max-h-[400px] min-h-[180px] w-full max-w-[400px] items-center self-center sm:min-h-[260px] lg:aspect-[3/4] lg:max-h-[500px] lg:min-h-[400px] lg:w-1/2 lg:flex-1"
-                  style={{ aspectRatio: 0.8 }}>
+                  className="min-h-[180px] w-full max-w-[400px] items-center self-center sm:min-h-[260px] lg:aspect-[3/4] lg:max-h-[500px] lg:min-h-[400px] lg:w-1/2 lg:flex-1"
+                  style={{ aspectRatio: 0.9 }}>
                   <ShadowView
                     style={{
                       position: 'absolute',
@@ -171,7 +171,7 @@ export default function HomeScreen() {
                         key={cameraKey}
                         style={{
                           width: '100%',
-                          aspectRatio: 0.8,
+                          aspectRatio: 0.9,
                           borderRadius: 24,
                           overflow: 'hidden',
                         }}
