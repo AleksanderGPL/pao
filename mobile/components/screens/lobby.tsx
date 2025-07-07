@@ -171,9 +171,16 @@ export default function LobbyScreen({
         </View>
         <View className="flex-1" />
         <View className="w-full pb-5">
-          {validPlayers.find(
-            (player) => player.isHost && currentPlayerId?.current === player.id
-          ) ? (
+          {validPlayers.length < 3 ? (
+            <View className="items-center">
+              <Text className="text-center text-muted-foreground">
+                Waiting for {3 - validPlayers.length} more player
+                {3 - validPlayers.length === 1 ? '' : 's'} to join...
+              </Text>
+            </View>
+          ) : validPlayers.find(
+              (player) => player.isHost && currentPlayerId?.current === player.id
+            ) ? (
             <Button onPress={onStartGame} className="w-full">
               <Text>Start Game</Text>
             </Button>
