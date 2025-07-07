@@ -122,19 +122,9 @@ export default function HomeScreen() {
             <View>
               <View className="flex w-full flex-col items-stretch justify-center gap-4 lg:flex-row lg:items-start lg:gap-8">
                 {/* Camera View */}
-                <View className="aspect-square max-h-[400px] min-h-[180px] w-full max-w-[400px] items-center self-center sm:min-h-[260px] lg:aspect-[3/4] lg:max-h-[500px] lg:min-h-[400px] lg:w-1/2 lg:flex-1">
-                  <BlurView
-                    intensity={40}
-                    tint="light"
-                    style={{
-                      position: 'absolute',
-                      width: '100%',
-                      height: '100%',
-                      borderRadius: 24,
-                      overflow: 'hidden',
-                    }}>
-                    {/* Camera or fallback content goes here */}
-                  </BlurView>
+                <View
+                  className="max-h-[400px] min-h-[180px] w-full max-w-[400px] items-center self-center sm:min-h-[260px] lg:aspect-[3/4] lg:max-h-[500px] lg:min-h-[400px] lg:w-1/2 lg:flex-1"
+                  style={{ aspectRatio: 0.8 }}>
                   <ShadowView
                     style={{
                       position: 'absolute',
@@ -183,6 +173,7 @@ export default function HomeScreen() {
                         style={{
                           width: '100%',
                           height: '100%',
+                          aspectRatio: 0.8,
                           borderRadius: 24,
                           overflow: 'hidden',
                         }}
