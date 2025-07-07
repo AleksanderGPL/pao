@@ -96,11 +96,14 @@ export function registerWsHandler(app: Hono) {
 
           wsClients.set(`${gameCode}:${player?.id}`, ws);
         },
-        onMessage(event) {
-          console.log(`Message from client: ${event.data}`);
-        },
-        onClose: () => {
+        onClose: (_, ws) => {
           console.log("Connection closed");
+          for (const [key, wsClient] of wsClients.entries()) {
+            if (wsClient === ws) {
+              wsClients.delete(key);
+              break;
+            }
+          }
         },
       };
     }),

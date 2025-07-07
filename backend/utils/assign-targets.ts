@@ -11,22 +11,8 @@ export async function assignRandomTargets(lobbyId: number) {
   });
 
   const playerIds = players.map((p) => p.id);
-  const targetIds = [...playerIds];
 
-  for (let i = targetIds.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [targetIds[i], targetIds[j]] = [targetIds[j], targetIds[i]];
-  }
-
-  for (let i = 0; i < playerIds.length; i++) {
-    if (playerIds[i] === targetIds[i]) {
-      const swapIndex = (i + 1) % playerIds.length;
-      [targetIds[i], targetIds[swapIndex]] = [
-        targetIds[swapIndex],
-        targetIds[i],
-      ];
-    }
-  }
+  const targetIds = generateDerangement(playerIds);
 
   const updates = playerIds.map((playerId, index) =>
     db.update(lobbyPlayersTable)
@@ -40,4 +26,48 @@ export async function assignRandomTargets(lobbyId: number) {
     playerId,
     targetId: targetIds[index],
   }));
+}
+
+function generateDerangement<T>(array: T[]): T[] {
+  const n = array.length;
+  const result = [...array];
+
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+
+  for (let i = 0; i < n; i++) {
+    if (result[i] === array[i]) {
+      let swapIndex = (i + 1) % n;
+
+      while (swapIndex !== i) {
+        if (
+          result[swapIndex] !== array[swapIndex] &&
+          result[swapIndex] !== array[i]
+        ) {
+          [result[i], result[swapIndex]] = [result[swapIndex], result[i]];
+          break;
+        }
+        swapIndex = (swapIndex + 1) % n;
+      }
+
+      if (swapIndex === i) {
+        for (let j = 0; j < n; j++) {
+          if (j !== i && result[j] !== array[j] && result[j] !== array[i]) {
+            [result[i], result[j]] = [result[j], result[i]];
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  for (let i = 0; i < n; i++) {
+    if (result[i] === array[i]) {
+      return generateDerangement(array);
+    }
+  }
+
+  return result;
 }

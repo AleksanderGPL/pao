@@ -117,7 +117,7 @@ app.post(
       },
     };
 
-    redis.publish(
+    await redis.publish(
       `game:${game.code}`,
       JSON.stringify({
         type: "player_join",
@@ -188,8 +188,8 @@ app.post(
     const targetAssignments = await assignRandomTargets(game.id);
 
     await Promise.all(
-      targetAssignments.map((assignment) => {
-        redis.publish(
+      targetAssignments.map(async (assignment) => {
+        await redis.publish(
           `game:${game.code}`,
           JSON.stringify({
             type: "player_target_assigned",
@@ -203,7 +203,7 @@ app.post(
       status: "active",
     }).where(eq(lobbiesTable.id, game.id));
 
-    redis.publish(
+    await redis.publish(
       `game:${game.code}`,
       JSON.stringify({
         type: "start_game",
@@ -296,7 +296,7 @@ app.post(
         targetId: eliminatedPlayerTargetId,
       }).where(eq(lobbyPlayersTable.id, initiatingPlayer.id));
 
-      redis.publish(
+      await redis.publish(
         `game:${game.code}`,
         JSON.stringify({
           type: "player_target_assigned",
@@ -315,7 +315,7 @@ app.post(
       key: `game/${game.code}/player/${playerId}/shot.avif`,
     });
 
-    redis.publish(
+    await redis.publish(
       `game:${game.code}`,
       JSON.stringify({
         type: "player_kill",
