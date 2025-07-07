@@ -32,6 +32,33 @@ export default function HomeScreen() {
   const router = useRouter();
   const { username } = useUsernameStore();
 
+  // Function to detect if we're on mobile web
+  const isMobileWeb = () => {
+    if (Platform.OS !== 'web') return false;
+
+    // Check if we're in a browser environment
+    if (typeof navigator === 'undefined') return false;
+
+    // Check user agent for mobile indicators
+    const userAgent = navigator.userAgent.toLowerCase();
+    const mobileKeywords = [
+      'android',
+      'iphone',
+      'ipad',
+      'ipod',
+      'blackberry',
+      'windows phone',
+      'mobile',
+    ];
+    const isMobileUserAgent = mobileKeywords.some((keyword) => userAgent.includes(keyword));
+
+    // Also check for touch capability and screen size as additional indicators
+    const hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isSmallScreen = window.innerWidth <= 768;
+
+    return isMobileUserAgent || (hasTouchScreen && isSmallScreen);
+  };
+
   // Reset QR scanning state when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
@@ -129,58 +156,74 @@ export default function HomeScreen() {
                     style={{
                       position: 'absolute',
                       width: '100%',
-
                       borderRadius: 24,
                       overflow: 'hidden',
                     }}>
-                    {/* QR Code Icon in top left when camera is active */}
-                    {permission && permission.granted && !hasScanned && (
-                      <View style={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
-                        <Icon icon={QrCode} size={24} className="text-white/80 sm:h-8 sm:w-8" />
-                      </View>
-                    )}
-                    {!permission ? (
-                      <View
-                        className="size-full items-center justify-center rounded-lg bg-black bg-gray-200"
-                        style={{ borderRadius: 24 }}>
-                        <Text className="text-center text-sm text-gray-500 sm:text-base">
-                          Loading camera...
-                        </Text>
-                      </View>
-                    ) : !permission.granted ? (
+                    {/* Show mobile web message if on mobile browser */}
+                    {isMobileWeb() ? (
                       <View
                         className="size-full items-center justify-center rounded-lg bg-gray-200 p-4"
                         style={{ borderRadius: 24 }}>
-                        <Text className="mb-4 text-center text-sm text-gray-700 sm:text-base">
-                          Camera access needed for QR scanning
+                        <Icon icon={QrCode} size={48} className="mb-4 text-gray-400" />
+                        <Text className="mb-4 text-center text-sm font-medium text-gray-700 sm:text-base">
+                          Please use the mobile app, or type in the code below.
                         </Text>
-                        <Button onPress={requestPermission}>
-                          <Text>Grant Permission</Text>
-                        </Button>
-                      </View>
-                    ) : hasScanned ? (
-                      <View
-                        className="size-full items-center justify-center rounded-lg bg-gray-200"
-                        style={{ borderRadius: 24 }}>
-                        <Text className="text-center text-sm text-gray-500 sm:text-base">
-                          QR Code scanned! Redirecting...
+                        <Text className="text-center text-xs text-gray-500 sm:text-sm">
+                          QR code scanning only works on desktop when using web
                         </Text>
                       </View>
                     ) : (
-                      <CameraView
-                        key={cameraKey}
-                        style={{
-                          width: '100%',
-                          aspectRatio: 0.9,
-                          borderRadius: 24,
-                          overflow: 'hidden',
-                        }}
-                        facing="back"
-                        barcodeScannerSettings={{
-                          barcodeTypes: ['qr'],
-                        }}
-                        onBarcodeScanned={handleBarcodeScanned}
-                      />
+                      <>
+                        {/* QR Code Icon in top left when camera is active */}
+                        {permission && permission.granted && !hasScanned && (
+                          <View style={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
+                            <Icon icon={QrCode} size={24} className="text-white/80 sm:h-8 sm:w-8" />
+                          </View>
+                        )}
+                        {!permission ? (
+                          <View
+                            className="size-full items-center justify-center rounded-lg bg-black bg-gray-200"
+                            style={{ borderRadius: 24 }}>
+                            <Text className="text-center text-sm text-gray-500 sm:text-base">
+                              Loading camera...
+                            </Text>
+                          </View>
+                        ) : !permission.granted ? (
+                          <View
+                            className="size-full items-center justify-center rounded-lg bg-gray-200 p-4"
+                            style={{ borderRadius: 24 }}>
+                            <Text className="mb-4 text-center text-sm text-gray-700 sm:text-base">
+                              Camera access needed for QR scanning
+                            </Text>
+                            <Button onPress={requestPermission}>
+                              <Text>Grant Permission</Text>
+                            </Button>
+                          </View>
+                        ) : hasScanned ? (
+                          <View
+                            className="size-full items-center justify-center rounded-lg bg-gray-200"
+                            style={{ borderRadius: 24 }}>
+                            <Text className="text-center text-sm text-gray-500 sm:text-base">
+                              QR Code scanned! Redirecting...
+                            </Text>
+                          </View>
+                        ) : (
+                          <CameraView
+                            key={cameraKey}
+                            style={{
+                              width: '100%',
+                              aspectRatio: 0.9,
+                              borderRadius: 24,
+                              overflow: 'hidden',
+                            }}
+                            facing="back"
+                            barcodeScannerSettings={{
+                              barcodeTypes: ['qr'],
+                            }}
+                            onBarcodeScanned={handleBarcodeScanned}
+                          />
+                        )}
+                      </>
                     )}
                   </ShadowView>
                 </View>
