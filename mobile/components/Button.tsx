@@ -5,11 +5,11 @@ import { TextClassContext } from './Text';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'group flex items-center justify-center rounded-md web:ring-offset-background web:transition-colors web:focus-visible:outline-none web:focus-visible:ring-1 web:focus-visible:ring-ring web:focus-visible:ring-offset-0',
+  'group flex items-center rounded-3xl justify-center web:ring-offset-background web:transition-colors web:focus-visible:outline-none web:focus-visible:ring-1 web:focus-visible:ring-ring web:focus-visible:ring-offset-0',
   {
     variants: {
       variant: {
-        default: 'bg-[#8457FF] web:hover:opacity-90 active:opacity-90 rounded-2xl',
+        default: 'bg-[#8457FF] web:hover:opacity-90 active:opacity-90',
         destructive: 'bg-destructive web:hover:opacity-90 active:opacity-90',
         outline:
           'border border-input bg-card web:hover:bg-accent web:hover:text-accent-foreground active:bg-accent',
