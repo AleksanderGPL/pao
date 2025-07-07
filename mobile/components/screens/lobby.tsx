@@ -104,7 +104,7 @@ export default function LobbyScreen({
 
         <ShadowView className="w-full max-w-[400px] items-center self-center rounded-3xl bg-white pb-7">
           <QRCodeStyled
-            data={process.env.EXPO_PUBLIC_DEPLOY_LINK + '?gameCode=' + gameCode}
+            data={'https://pao.aleksander.cc/game' + '?gameCode=' + gameCode}
             className="aspect-square h-[20rem] w-full"
             padding={40}
             pieceSize={8}

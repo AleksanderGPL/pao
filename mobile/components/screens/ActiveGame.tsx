@@ -553,7 +553,7 @@ export const ActiveGameScreen = ({
             <View className="items-center space-y-4">
               <View className="rounded-lg bg-white p-4">
                 <QRCodeStyled
-                  data={process.env.EXPO_PUBLIC_DEPLOY_LINK + '?gameCode=' + gameInfo.code}
+                  data={'https://pao.aleksander.cc/game' + '?gameCode=' + gameInfo.code}
                   className="aspect-square"
                   padding={20}
                   pieceSize={6}
