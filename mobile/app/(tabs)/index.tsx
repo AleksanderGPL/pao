@@ -166,10 +166,11 @@ export default function HomeScreen() {
                         style={{ borderRadius: 24 }}>
                         <Icon icon={QrCode} size={48} className="mb-4 text-gray-400" />
                         <Text className="mb-4 text-center text-sm font-medium text-gray-700 sm:text-base">
-                          Please use the mobile app, or type in the code below.
+                          Please use the mobile app, or type in the code below, or scan using the
+                          normal Camera app.
                         </Text>
                         <Text className="text-center text-xs text-gray-500 sm:text-sm">
-                          QR code scanning only works on desktop when using web
+                          QR code scanning only works on web when using desktop browser
                         </Text>
                       </View>
                     ) : (
