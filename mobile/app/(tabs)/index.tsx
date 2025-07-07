@@ -140,6 +140,7 @@ export default function HomeScreen() {
                       position: 'absolute',
                       width: '100%',
                       height: '100%',
+
                       borderRadius: 24,
                       overflow: 'hidden',
                     }}>
@@ -203,10 +204,9 @@ export default function HomeScreen() {
                       setGameCode(text.toUpperCase());
                     }}
                     autoCapitalize="characters"
-                    className="w-full py-2 text-sm sm:py-3 sm:text-base rounded-2xl"
+                    className="w-full rounded-2xl py-2 text-sm sm:py-3 sm:text-base"
                   />
-                  <Button
-                    onPress={handleJoinGame}>
+                  <Button onPress={handleJoinGame}>
                     <Text
                       className={`${!isValidGameCode(gameCode) ? 'font-bold text-muted-foreground text-white' : ''} text-sm sm:text-base`}>
                       Join Game
