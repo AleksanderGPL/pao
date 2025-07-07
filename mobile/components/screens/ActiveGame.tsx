@@ -79,7 +79,9 @@ const CameraPermissionView = ({ onRequestPermission }: { onRequestPermission: ()
     <View className="flex-1 items-center justify-center bg-gray-900 p-6">
       <View className="items-center space-y-4">
         <AlertCircle size={48} className="text-yellow-500" />
-        <Text className="text-center text-lg font-semibold text-white">Camera Permission Required</Text>
+        <Text className="text-center text-lg font-semibold text-white">
+          Camera Permission Required
+        </Text>
         <Text className="text-center text-white/80">
           This app needs camera access to take photos of your targets.
         </Text>
@@ -106,11 +108,11 @@ export const ActiveGameScreen = ({
 }) => {
   const alivePlayers = players.filter((player) => player.isAlive);
   const eliminatedPlayers = players.filter((player) => !player.isAlive);
-  
+
   // Check if current player is actually alive
   const currentPlayer = players.find((p) => p.id === currentPlayerId);
   const isPlayerAlive = currentPlayer?.isAlive ?? false;
-  
+
   const formatTimeRemaining = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -144,7 +146,7 @@ export const ActiveGameScreen = ({
     if (isShooting) {
       setCameraError(null);
       setIsCameraReady(false);
-      
+
       // On Android, add extra logging for debugging
       if (Platform.OS === 'android') {
         console.log('Starting camera on Android');
@@ -156,13 +158,13 @@ export const ActiveGameScreen = ({
   const handleCameraError = (error: any) => {
     console.error('Camera error:', error);
     let errorMessage = 'An unknown camera error occurred';
-    
+
     if (error?.message) {
       errorMessage = error.message;
     } else if (typeof error === 'string') {
       errorMessage = error;
     }
-    
+
     // Android-specific error handling
     if (Platform.OS === 'android') {
       console.log('Android camera error detected');
@@ -174,7 +176,7 @@ export const ActiveGameScreen = ({
         return;
       }
     }
-    
+
     setCameraError(errorMessage);
     setIsShooting(false);
   };
@@ -225,7 +227,7 @@ export const ActiveGameScreen = ({
       };
 
       const photo = await cameraRef.current.takePictureAsync(cameraOptions);
-      
+
       if (!photo?.uri) {
         throw new Error('Failed to capture photo');
       }
@@ -301,7 +303,7 @@ export const ActiveGameScreen = ({
 
     // Show instant success feedback
     Alert.alert('Target Eliminated!', `${currentTarget.user.name} has been eliminated!`, [
-      { text: 'OK' }
+      { text: 'OK' },
     ]);
 
     // Start background upload
@@ -321,7 +323,7 @@ export const ActiveGameScreen = ({
 
     // Simulate progress updates
     const progressInterval = setInterval(() => {
-      setUploadProgress(prev => {
+      setUploadProgress((prev) => {
         if (prev >= 90) return prev;
         return prev + Math.random() * 10;
       });
@@ -332,59 +334,64 @@ export const ActiveGameScreen = ({
       console.log('Game code:', uploadData.gameCode);
       console.log('Target ID:', uploadData.targetId);
       console.log('Target name:', uploadData.targetName);
-      console.log('Photo taken at:', uploadData.photoTakenAt ? new Date(uploadData.photoTakenAt).toISOString() : 'unknown');
+      console.log(
+        'Photo taken at:',
+        uploadData.photoTakenAt ? new Date(uploadData.photoTakenAt).toISOString() : 'unknown'
+      );
       console.log('Image format:', uploadData.imageFormat);
-      
+
       // For React Native, we need to handle FormData differently
       const formData = new FormData();
-      
+
       // Create the file object for React Native
       const fileUri = uploadData.imageUri;
       const fileName = `shot.${uploadData.imageFormat}`;
       const mimeType = `image/${uploadData.imageFormat.toLowerCase()}`;
-      
+
       formData.append('image', {
         uri: fileUri,
         type: mimeType,
         name: fileName,
       } as any);
-      
+
       console.log('FormData created, making API request...');
 
       // Upload with optimized settings
-      const apiResponse = await api.post(`/game/${uploadData.gameCode}/player/${uploadData.targetId}/shoot`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        timeout: 30000, // 30 second timeout
-      });
-      
+      const apiResponse = await api.post(
+        `/game/${uploadData.gameCode}/player/${uploadData.targetId}/shoot`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          timeout: 30000, // 30 second timeout
+        }
+      );
+
       console.log('Background upload successful:', apiResponse.data);
 
       // Complete progress
       setUploadProgress(100);
-      
+
       // Show subtle success notification
       setTimeout(() => {
         // You could show a toast notification here instead of alert
         console.log('Shot uploaded successfully in background');
       }, 1000);
-      
     } catch (error: any) {
       console.error('Background upload error:', error);
       console.error('Error response:', error.response?.data);
       console.error('Error status:', error.response?.status);
       console.error('Error message:', error.message);
-      
+
       // Show error notification without blocking the UI
       setTimeout(() => {
         Alert.alert(
-          'Upload Failed', 
+          'Upload Failed',
           'The elimination was successful, but the shot image failed to upload. The game will continue normally.',
           [{ text: 'OK' }]
         );
       }, 1000);
-      
     } finally {
       // Clean up
       clearInterval(progressInterval);
@@ -402,20 +409,15 @@ export const ActiveGameScreen = ({
           style={{ transform: [{ scaleX: -1 }] }}
         />
         <TargetOverlay player={currentTarget!} />
-        
+
         <View className="absolute bottom-10 left-0 right-0 flex-row justify-center gap-4 px-4">
-          <Button 
-            className="flex-1 bg-red-500" 
-            onPress={discardPhoto}
-            disabled={isUploading}
-          >
+          <Button className="flex-1 bg-red-500" onPress={discardPhoto} disabled={isUploading}>
             <Text>Discard</Text>
           </Button>
-          <Button 
-            className={`flex-1 ${isUploading ? 'bg-gray-400' : 'bg-green-500'}`} 
+          <Button
+            className={`flex-1 ${isUploading ? 'bg-gray-400' : 'bg-green-500'}`}
             onPress={confirmShot}
-            disabled={isUploading}
-          >
+            disabled={isUploading}>
             <Text>{isUploading ? 'Uploading...' : 'Confirm Shot'}</Text>
           </Button>
         </View>
@@ -435,12 +437,12 @@ export const ActiveGameScreen = ({
   if (isShooting) {
     if (cameraError) {
       return (
-        <CameraErrorView 
-          error={cameraError} 
+        <CameraErrorView
+          error={cameraError}
           onRetry={() => {
             setCameraError(null);
             setIsShooting(false);
-          }} 
+          }}
         />
       );
     }
@@ -449,7 +451,7 @@ export const ActiveGameScreen = ({
       <View className="h-full w-full" style={{ backgroundColor: 'black' }}>
         <CameraView
           ref={cameraRef}
-          facing='front'
+          facing="front"
           className="h-full w-full"
           onCameraReady={handleCameraReady}
           style={{ flex: 1, width: '100%', height: '100%' }}
@@ -462,7 +464,9 @@ export const ActiveGameScreen = ({
           <View className="absolute inset-0 items-center justify-center bg-black/20">
             <View className="rounded-lg bg-black/80 p-4">
               <Text className="text-white">
-                {Platform.OS === 'android' ? 'Initializing camera on Android...' : 'Initializing camera...'}
+                {Platform.OS === 'android'
+                  ? 'Initializing camera on Android...'
+                  : 'Initializing camera...'}
               </Text>
             </View>
           </View>
@@ -489,25 +493,23 @@ export const ActiveGameScreen = ({
   }
 
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: 'white' }}>
+    <SafeAreaView className="flex-1">
       {/* Shot Image Modal */}
       <Modal
         visible={!!selectedShotImage}
         transparent={true}
         animationType="fade"
-        onRequestClose={() => setSelectedShotImage(null)}
-      >
-        <View className="flex-1 bg-black/90 items-center justify-center">
+        onRequestClose={() => setSelectedShotImage(null)}>
+        <View className="flex-1 items-center justify-center bg-black/90">
           <TouchableOpacity
-            className="absolute top-12 right-4 z-10"
-            onPress={() => setSelectedShotImage(null)}
-          >
+            className="absolute right-4 top-12 z-10"
+            onPress={() => setSelectedShotImage(null)}>
             <X size={24} className="text-white" />
           </TouchableOpacity>
           {selectedShotImage && (
             <Image
               source={{ uri: selectedShotImage }}
-              className="w-full h-3/4"
+              className="h-3/4 w-full"
               resizeMode="contain"
             />
           )}
@@ -530,71 +532,62 @@ export const ActiveGameScreen = ({
 
         {/* QR Code Section */}
         <Card className="mb-4">
-            {showQRCode ? (
-              <View className="items-center space-y-4">
-                <View className="rounded-lg bg-white p-4">
-                  <QRCodeStyled
-                    data={process.env.EXPO_PUBLIC_DEPLOY_LINK + '?gameCode=' + gameInfo.code}
-                    className="aspect-square"
-                    padding={20}
-                    pieceSize={6}
-                    style={{
-                      width: qrSize,
-                      height: qrSize,
-                    }}
-                  />
-                </View>
-                <Button
-                  variant="outline"
-                  onPress={copyGameCode}
-                  className="flex-row items-center gap-2">
-                  <Text className="font-mono text-lg font-medium">{gameInfo.code}</Text>
-                  <Copy size={18} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  onPress={() => setShowQRCode(false)}
-                  className="mt-2">
-                  <Text>Hide QR Code</Text>
-                </Button>
+          {showQRCode ? (
+            <View className="items-center space-y-4">
+              <View className="rounded-lg bg-white p-4">
+                <QRCodeStyled
+                  data={process.env.EXPO_PUBLIC_DEPLOY_LINK + '?gameCode=' + gameInfo.code}
+                  className="aspect-square"
+                  padding={20}
+                  pieceSize={6}
+                  style={{
+                    width: qrSize,
+                    height: qrSize,
+                  }}
+                />
               </View>
-            ) : (
               <Button
                 variant="outline"
-                onPress={() => setShowQRCode(true)}
+                onPress={copyGameCode}
                 className="flex-row items-center gap-2">
-                <QrCode size={18} />
-                <Text>Show QR Code</Text>
+                <Text className="font-mono text-lg font-medium">{gameInfo.code}</Text>
+                <Copy size={18} />
               </Button>
-            )}
+              <Button variant="ghost" onPress={() => setShowQRCode(false)} className="mt-2">
+                <Text>Hide QR Code</Text>
+              </Button>
+            </View>
+          ) : (
+            <Button
+              variant="outline"
+              onPress={() => setShowQRCode(true)}
+              className="flex-row items-center gap-2">
+              <QrCode size={18} />
+              <Text>Show QR Code</Text>
+            </Button>
+          )}
         </Card>
 
         {/* Shoot Target button - only shown to alive players */}
-        <Button 
-          className="mb-4" 
-          onPress={() => setIsShooting(true)}
-          disabled={isUploading}
-        >
-          <Text>
-            {isUploading ? 'Uploading...' : 'Shoot Target'}
-          </Text>
+        <Button className="mb-4" onPress={() => setIsShooting(true)} disabled={isUploading}>
+          <Text>{isUploading ? 'Uploading...' : 'Shoot Target'}</Text>
         </Button>
-        
+
         {/* Background Upload Status Indicator */}
         {isUploading && (
-          <View className="mb-4 rounded-lg bg-green-50 border border-green-200 p-2">
+          <View className="mb-4 rounded-lg border border-green-200 bg-green-50 p-2">
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
-                <View className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <Text className="text-green-700 text-sm">Uploading shot image...</Text>
+                <View className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+                <Text className="text-sm text-green-700">Uploading shot image...</Text>
               </View>
-              <Text className="text-green-600 text-xs font-medium">
+              <Text className="text-xs font-medium text-green-600">
                 {Math.round(uploadProgress)}%
               </Text>
             </View>
-            <View className="mt-1 bg-green-100 rounded-full h-1">
-              <View 
-                className="bg-green-500 h-1 rounded-full transition-all duration-300"
+            <View className="mt-1 h-1 rounded-full bg-green-100">
+              <View
+                className="h-1 rounded-full bg-green-500 transition-all duration-300"
                 style={{ width: `${uploadProgress}%` }}
               />
             </View>
@@ -695,8 +688,9 @@ export const ActiveGameScreen = ({
               <View className="space-y-3">
                 {eliminatedPlayers.map((player, index) => {
                   // Construct shot image URL if not provided
-                  const shotImageUrl = player.shotImageUrl || getShotImageUrl(gameInfo.code, player.id);
-                  
+                  const shotImageUrl =
+                    player.shotImageUrl || getShotImageUrl(gameInfo.code, player.id);
+
                   return (
                     <View key={index} className="flex-row items-center space-x-3 opacity-60">
                       <Avatar alt={`${player.user.name} profile picture`}>
@@ -712,9 +706,8 @@ export const ActiveGameScreen = ({
                       {/* Shot Image */}
                       <TouchableOpacity
                         activeOpacity={0.7}
-                        onPress={() => setSelectedShotImage(shotImageUrl)}
-                      >
-                        <View className="h-12 w-12 rounded-lg border border-gray-300 bg-gray-100 items-center justify-center overflow-hidden">
+                        onPress={() => setSelectedShotImage(shotImageUrl)}>
+                        <View className="h-12 w-12 items-center justify-center overflow-hidden rounded-lg border border-gray-300 bg-gray-100">
                           <Image
                             source={{ uri: shotImageUrl }}
                             className="h-full w-full"

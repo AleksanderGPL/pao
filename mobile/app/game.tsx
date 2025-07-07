@@ -24,6 +24,7 @@ export interface ApiResponse {
   status: 'inactive' | 'active' | 'finished';
   createdAt: string;
   playerId: number;
+  targetId: number;
   players: {
     id: number;
     isAlive: boolean;
@@ -137,6 +138,9 @@ export default function GameScreen() {
       const res = await api.post<ApiResponse>(`/game/${params.gameCode}/join`);
       setGameInfo(res.data);
       setPlayers(res.data.players);
+      if (res.data.targetId) {
+        setCurrentTarget(res.data.targetId);
+      }
       currentPlayerId.current = res.data.playerId;
       console.log(res.data.playerId);
       setHasStarted(res.data.status === 'active');

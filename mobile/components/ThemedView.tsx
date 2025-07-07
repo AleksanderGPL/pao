@@ -7,7 +7,7 @@ export type ThemedViewProps = ViewProps & {
 };
 
 export function ThemedView({ className, lightColor, darkColor, ...otherProps }: ThemedViewProps) {
-  const baseClasses = 'bg-white dark:bg-gray-950';
+  const baseClasses = 'dark:bg-gray-950';
 
   return <View className={cn(baseClasses, className)} {...otherProps} />;
 }
