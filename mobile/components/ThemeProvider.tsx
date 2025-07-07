@@ -16,13 +16,12 @@ interface ThemeProviderProps {
   defaultTheme?: ThemeMode;
 }
 
-export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProviderProps) {
+export function ThemeProvider({ children, defaultTheme = 'light' }: ThemeProviderProps) {
   const deviceTheme = useNativeColorScheme();
   const [themeMode, setThemeMode] = useState<ThemeMode>(defaultTheme);
 
-  // Determine the actual theme based on mode
-  const resolvedTheme: ColorScheme =
-    themeMode === 'system' ? (deviceTheme === 'dark' ? 'dark' : 'light') : themeMode;
+  // Force light mode always
+  const resolvedTheme: ColorScheme = 'light';
 
   const setTheme = (mode: ThemeMode) => {
     setThemeMode(mode);
