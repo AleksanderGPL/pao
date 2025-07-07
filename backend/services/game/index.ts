@@ -5,7 +5,7 @@ import { z } from "zod";
 import { db } from "@/db/index.ts";
 import { lobbiesTable, lobbyPlayersTable } from "@/db/schema.ts";
 import { generateLobbyCode } from "@/utils/generate.ts";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { redis } from "@/utils/redis.ts";
 import { assignRandomTargets } from "@/utils/assign-targets.ts";
 import { uploadFileBuffer } from "@/utils/s3.ts";
@@ -64,6 +64,7 @@ app.post(
             id: true,
             isAlive: true,
             isHost: true,
+            killCount: true,
           },
           with: {
             user: {
@@ -324,6 +325,43 @@ app.post(
         },
       }),
     );
+
+    await db.update(lobbyPlayersTable).set({
+      killCount: sql`${lobbyPlayersTable.killCount} + 1`,
+    }).where(eq(lobbyPlayersTable.id, initiatingPlayer.id));
+
+    const [alivePlayers] = await db.select({
+      count: sql<number>`count(*)`,
+    }).from(lobbyPlayersTable).where(
+      and(
+        eq(lobbyPlayersTable.lobbyId, game.id),
+        eq(lobbyPlayersTable.isAlive, true),
+      ),
+    );
+
+    if (alivePlayers.count <= 1) {
+      await db.update(lobbiesTable).set({
+        status: "finished",
+      }).where(eq(lobbiesTable.id, game.id));
+
+      const players = await db.query.lobbyPlayersTable.findMany({
+        where: eq(lobbyPlayersTable.lobbyId, game.id),
+        columns: {
+          id: true,
+          killCount: true,
+        },
+      });
+
+      await redis.publish(
+        `game:${game.code}`,
+        JSON.stringify({
+          type: "end_game",
+          data: {
+            players,
+          },
+        }),
+      );
+    }
 
     return c.json({ message: "Player killed" });
   },

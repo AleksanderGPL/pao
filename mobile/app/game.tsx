@@ -42,6 +42,7 @@ export default function GameScreen() {
   const [hasStarted, setHasStarted] = useState(false);
   const [isEliminated, setIsEliminated] = useState(false);
   const [hasEnded, setHasEnded] = useState(false);
+  const [hasJoinedGame, setHasJoinedGame] = useState(false);
   const [currentUser, setCurrentUser] = useState<string>('');
   const currentPlayerId = useRef<number | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
@@ -74,7 +75,7 @@ export default function GameScreen() {
     getSessionToken();
   }, []);
 
-  const shouldConnectWebSocket = sessionToken !== null;
+  const shouldConnectWebSocket = sessionToken !== null && hasJoinedGame;
 
   useWebSocket(
     shouldConnectWebSocket
@@ -145,6 +146,7 @@ export default function GameScreen() {
       console.log(res.data.playerId);
       setHasStarted(res.data.status === 'active');
       setHasConnected(true);
+      setHasJoinedGame(true);
     } catch (err: any) {
       if (err.response?.status === 404) {
         console.error('Game not found');

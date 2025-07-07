@@ -15,7 +15,12 @@ import {
 const subscriber = redis.duplicate();
 subscriber.psubscribe("game:*");
 
-const retransmittableEvents = ["player_join", "start_game", "player_kill"];
+const retransmittableEvents = [
+  "player_join",
+  "start_game",
+  "player_kill",
+  "end_game",
+];
 
 subscriber.on("pmessage", (_, channel, message) => {
   const data = JSON.parse(message);
@@ -94,12 +99,14 @@ export function registerWsHandler(app: Hono) {
             },
           });
 
+          console.log("Connection opened", `${gameCode}:${player?.id}`);
+
           wsClients.set(`${gameCode}:${player?.id}`, ws);
         },
         onClose: (_, ws) => {
-          console.log("Connection closed");
           for (const [key, wsClient] of wsClients.entries()) {
             if (wsClient === ws) {
+              console.log("Connection closed", key);
               wsClients.delete(key);
               break;
             }

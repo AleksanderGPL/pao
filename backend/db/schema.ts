@@ -63,6 +63,7 @@ export const lobbyPlayersTable = pgTable("lobby_players", {
   userId: integer().references(() => usersTable.id, { onDelete: "cascade" }),
   isAlive: boolean().notNull().default(true),
   isHost: boolean().notNull().default(false),
+  killCount: integer().notNull().default(0),
   targetId: integer(),
   createdAt: timestamp().notNull().defaultNow(),
 }, (t) => [
