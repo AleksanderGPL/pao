@@ -3,7 +3,7 @@ import { Text } from '@/components/Text';
 import { Container } from '@/components/Container';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar';
-import { useEffect, useState } from 'react';
+import { RefObject, useEffect, useState } from 'react';
 import { View, ScrollView, Dimensions, Alert } from 'react-native';
 import QRCodeStyled from 'react-native-qrcode-styled';
 import { Button } from '../Button';
@@ -25,6 +25,7 @@ export default function LobbyScreen({
   onRefresh,
   currentUser,
   gameName,
+  currentPlayerId,
 }: {
   players: ApiResponse['players'] | null;
   gameCode: string;
@@ -32,6 +33,7 @@ export default function LobbyScreen({
   onStartGame: () => void;
   onRefresh?: () => void;
   currentUser?: string;
+  currentPlayerId?: RefObject<number | null>;
 }) {
   const [hasConnected, setHasConnected] = useState(false);
   const [showAllPlayers, setShowAllPlayers] = useState(false);
@@ -148,7 +150,7 @@ export default function LobbyScreen({
                     {player.isHost && (
                       <Text className="text-[1rem] font-bold text-[grey]"> Host</Text>
                     )}
-                    {currentUser === player.user.name && (
+                    {currentPlayerId?.current === player.id && (
                       <Text className="ml-2 text-sm text-muted-foreground"> (you)</Text>
                     )}
                   </Text>
@@ -169,7 +171,9 @@ export default function LobbyScreen({
         </View>
         <View className="flex-1" />
         <View className="w-full pb-5">
-          {validPlayers.find((player) => player.isHost && currentUser === player.user.name) ? (
+          {validPlayers.find(
+            (player) => player.isHost && currentPlayerId?.current === player.id
+          ) ? (
             <Button onPress={onStartGame} className="w-full">
               <Text>Start Game</Text>
             </Button>

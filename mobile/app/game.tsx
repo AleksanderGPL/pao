@@ -179,6 +179,7 @@ export default function GameScreen() {
           onStartGame={startGame}
           onRefresh={fetchGameData}
           currentUser={currentUser}
+          currentPlayerId={currentPlayerId}
         />
       ) : hasEnded ? (
         <WinScreen />
