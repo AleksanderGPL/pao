@@ -23,6 +23,7 @@ import * as Clipboard from 'expo-clipboard';
 import type { ApiResponse } from '@/app/game';
 import { api, getShotImageUrl } from '@/lib/axios';
 import { X, AlertCircle, Camera, Copy, QrCode } from 'lucide-react-native';
+import { getBlobFroUri } from '@/lib/utils';
 
 const TargetOverlay = ({ player }: { player?: ApiResponse['players'][number] }) => {
   return (
@@ -347,16 +348,22 @@ export const ActiveGameScreen = ({
       const fileUri = uploadData.imageUri;
       const fileName = `shot.${uploadData.imageFormat}`;
       const mimeType = `image/${uploadData.imageFormat.toLowerCase()}`;
+      let blob = null;
+      if (Platform.OS === 'web') {
+        const response = await fetch(fileUri);
+        blob = await response.blob();
+      } else {
+        blob = await getBlobFroUri(fileUri);
+      }
 
       const response = await fetch(uploadData.imageUri);
       if (!response.ok) {
         throw new Error('Failed to fetch captured image');
       }
 
-      const blob = await response.blob();
-      console.log('Blob size:', blob.size, 'bytes');
+      console.log('Blob size:', blob!.size, 'bytes');
 
-      const file = new File([blob], `shot.${capturedImageFormat}`, {
+      const file = new File([blob!], `shot.${capturedImageFormat}`, {
         type: mimeType,
         lastModified: Date.now(),
       });

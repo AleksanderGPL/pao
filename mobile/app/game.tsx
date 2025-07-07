@@ -41,10 +41,11 @@ export default function GameScreen() {
   const [hasConnected, setHasConnected] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [isEliminated, setIsEliminated] = useState(false);
-  const [hasEnded, setHasEnded] = useState(false);
+  const [hasEnded, setHasEnded] = useState<{ name: string; kills: number }[] | null>(null);
   const [hasJoinedGame, setHasJoinedGame] = useState(false);
   const [currentUser, setCurrentUser] = useState<string>('');
   const currentPlayerId = useRef<number | null>(null);
+  const playersRef = useRef<ApiResponse['players'] | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const params = useLocalSearchParams();
   const { username, loadUsername } = useUsernameStore();
@@ -52,6 +53,11 @@ export default function GameScreen() {
   const [gameInfo, setGameInfo] = useState<Omit<ApiResponse, 'players'> | null>(null);
   const [players, setPlayers] = useState<ApiResponse['players'] | null>(null);
   const [currentTarget, setCurrentTarget] = useState<number | null>(0);
+
+  // Keep playersRef in sync with players state
+  useEffect(() => {
+    playersRef.current = players;
+  }, [players]);
 
   // Get current user from Zustand store
   useEffect(() => {
@@ -91,7 +97,7 @@ export default function GameScreen() {
               return;
             }
             console.log('player_join', message.data.player.id);
-            if (!players?.some((player) => player.id === message.data.player.id)) {
+            if (!playersRef.current?.some((player) => player.id === message.data.player.id)) {
               setPlayers(
                 (prev) => [...(prev || []), message.data.player] as ApiResponse['players']
               );
@@ -123,8 +129,17 @@ export default function GameScreen() {
               console.log('isEliminated', isEliminated);
             }
             break;
-          case 'game_ended':
-            setHasEnded(true);
+          case 'end_game':
+            console.log('end_game', message.data.players);
+            const leaderBoard = message.data.players.map(
+              (player: { id: number; killCount: number }) => ({
+                name: playersRef.current?.find((p) => p.id === player.id)?.user.name,
+                kills: player.killCount,
+              })
+            );
+            console.log('players', playersRef.current);
+            console.log('leaderBoard', leaderBoard);
+            setHasEnded(leaderBoard);
             break;
           default:
             console.log('Unknown message type:', message.type);
@@ -133,6 +148,10 @@ export default function GameScreen() {
       },
     }
   );
+
+  useEffect(() => {
+    console.log('hasEnded', hasEnded);
+  }, [hasEnded]);
 
   const fetchGameData = async () => {
     try {
@@ -182,7 +201,7 @@ export default function GameScreen() {
           currentPlayerId={currentPlayerId}
         />
       ) : hasEnded ? (
-        <WinScreen />
+        <WinScreen leaderBoard={hasEnded} />
       ) : isEliminated || isPlayerEliminated ? (
         isEliminated ? (
           <EliminatedScreen
