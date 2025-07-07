@@ -348,17 +348,28 @@ export const ActiveGameScreen = ({
       const fileName = `shot.${uploadData.imageFormat}`;
       const mimeType = `image/${uploadData.imageFormat.toLowerCase()}`;
 
-      formData.append('image', {
-        uri: fileUri,
+      const response = await fetch(uploadData.imageUri);
+      if (!response.ok) {
+        throw new Error('Failed to fetch captured image');
+      }
+
+      const blob = await response.blob();
+      console.log('Blob size:', blob.size, 'bytes');
+
+      const file = new File([blob], `shot.${capturedImageFormat}`, {
         type: mimeType,
-        name: fileName,
-      } as any);
+        lastModified: Date.now(),
+      });
+
+      console.log('File created:', file.name, file.type, file.size);
+
+      formData.append('image', file);
 
       console.log('FormData created, making API request...');
 
-      // Upload with optimized settings
+      // Upload with proper headers
       const apiResponse = await api.post(
-        `/game/${uploadData.gameCode}/player/${uploadData.targetId}/shoot`,
+        `/game/${gameInfo.code}/player/${target}/shoot`,
         formData,
         {
           headers: {
