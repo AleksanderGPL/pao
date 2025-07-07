@@ -150,8 +150,8 @@ export default function HomeScreen() {
               <View className="flex w-full flex-col items-stretch justify-center gap-4 lg:flex-row lg:items-start lg:gap-8">
                 {/* Camera View */}
                 <View
-                  className="min-h-[180px] w-full max-w-[400px] items-center self-center sm:min-h-[260px] lg:aspect-[3/4] lg:max-h-[500px] lg:min-h-[400px] lg:w-1/2 lg:flex-1"
-                  style={{ aspectRatio: 0.9 }}>
+                  className="w-full max-w-[400px] items-center self-center lg:aspect-[3/4] lg:w-1/2 lg:flex-1"
+                  style={{ aspectRatio: isMobileWeb() ? 1.5 : 0.9 }}>
                   <ShadowView
                     style={{
                       position: 'absolute',
