@@ -22,7 +22,7 @@ import QRCodeStyled from 'react-native-qrcode-styled';
 import * as Clipboard from 'expo-clipboard';
 import type { ApiResponse } from '@/app/game';
 import { api, getShotImageUrl } from '@/lib/axios';
-import { X, AlertCircle, Camera, Copy, QrCode } from 'lucide-react-native';
+import { X, AlertCircle, Camera, Copy, QrCode, Eye } from 'lucide-react-native';
 
 const TargetOverlay = ({ player }: { player?: ApiResponse['players'][number] }) => {
   return (
@@ -99,12 +99,14 @@ export const ActiveGameScreen = ({
   target,
   isEliminated,
   currentPlayerId,
+  isSpectator,
 }: {
   players: ApiResponse['players'];
   target: number;
   gameInfo: Omit<ApiResponse, 'players'>;
   isEliminated: boolean;
   currentPlayerId: number | null;
+  isSpectator: boolean;
 }) => {
   const alivePlayers = players.filter((player) => player.isAlive);
   const eliminatedPlayers = players.filter((player) => !player.isAlive);
@@ -536,6 +538,19 @@ export const ActiveGameScreen = ({
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerClassName={`p-5 ${Platform.OS === 'android' ? 'pt-4' : 'pt-8'}`}>
+        {isSpectator && (
+          <Card className="mb-4 border border-red-300 bg-red-50">
+            <CardContent className="p-4">
+              <View className="flex-row items-center justify-center gap-2">
+                <Eye size={20} className="text-red-600" />
+                <Text className="text-lg font-semibold text-red-700">Spectator Mode</Text>
+              </View>
+              <Text className="mt-1 text-center text-sm text-red-600">
+                You have been eliminated. Watch the game progress below.
+              </Text>
+            </CardContent>
+          </Card>
+        )}
         {/* Game Header */}
         <Card className="mb-4">
           <CardHeader>
@@ -586,9 +601,11 @@ export const ActiveGameScreen = ({
         </View>
 
         {/* Shoot Target button - only shown to alive players */}
-        <Button className="mb-4" onPress={() => setIsShooting(true)} disabled={isUploading}>
-          <Text>{isUploading ? 'Uploading...' : 'Shoot Target'}</Text>
-        </Button>
+        {!isSpectator && (
+          <Button className="mb-4" onPress={() => setIsShooting(true)} disabled={isUploading}>
+            <Text>{isUploading ? 'Uploading...' : 'Shoot Target'}</Text>
+          </Button>
+        )}
 
         {/* Background Upload Status Indicator */}
         {isUploading && (
@@ -614,10 +631,10 @@ export const ActiveGameScreen = ({
         {/* Current Target */}
         <Card className="mb-4">
           <CardHeader>
-            <CardTitle>🎯 Current Target</CardTitle>
+            <CardTitle>🎯 Current </CardTitle>
           </CardHeader>
           <CardContent>
-            <View className="flex-row items-center space-x-3">
+            <View className="flex-row items-center gap-3">
               <Avatar className="h-12 w-12" alt={`${currentTarget?.user.name} profile picture`}>
                 <AvatarImage
                   source={{
@@ -646,7 +663,7 @@ export const ActiveGameScreen = ({
             <CardTitle>📊 Game Stats</CardTitle>
           </CardHeader>
           <CardContent>
-            <View className="space-y-2">
+            <View className="gap-2">
               <View className="flex-row justify-between">
                 <Text className="text-muted-foreground">Time Remaining</Text>
                 {/* <Text className="font-semibold">{formatTimeRemaining(gameInfo.timeRemaining)}</Text> */}
@@ -671,9 +688,9 @@ export const ActiveGameScreen = ({
             <CardTitle>✅ Alive Players ({alivePlayers.length})</CardTitle>
           </CardHeader>
           <CardContent>
-            <View className="space-y-3">
+            <View className="gap-3">
               {alivePlayers.map((player, index) => (
-                <View key={index} className="flex-row items-center space-x-3">
+                <View key={index} className="flex-row items-center gap-3">
                   <Avatar alt={`${player.user.name} profile picture`}>
                     <AvatarImage source={{ uri: player.user.profilePicture }} />
                     <AvatarFallback>
@@ -702,14 +719,14 @@ export const ActiveGameScreen = ({
               <CardTitle>❌ Eliminated Players ({eliminatedPlayers.length})</CardTitle>
             </CardHeader>
             <CardContent>
-              <View className="space-y-3">
+              <View className="gap-3">
                 {eliminatedPlayers.map((player, index) => {
                   // Construct shot image URL if not provided
                   const shotImageUrl =
                     player.shotImageUrl || getShotImageUrl(gameInfo.code, player.id);
 
                   return (
-                    <View key={index} className="flex-row items-center space-x-3 opacity-60">
+                    <View key={index} className="flex-row items-center gap-3 opacity-60">
                       <Avatar alt={`${player.user.name} profile picture`}>
                         <AvatarImage source={{ uri: player.user.profilePicture }} />
                         <AvatarFallback>

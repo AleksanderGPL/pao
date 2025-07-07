@@ -202,19 +202,15 @@ export default function GameScreen() {
         />
       ) : hasEnded ? (
         <WinScreen leaderBoard={hasEnded} players={players!} gameCode={gameInfo!.code} />
-      ) : isEliminated || isPlayerEliminated ? (
-        isEliminated ? (
-          <EliminatedScreen
-            gameCode={gameInfo!.code}
-            targetId={currentPlayerId}
-            onBackToLobby={() => {
-              setIsEliminated(false);
-              // This will now show the SpectatorScreen since isPlayerEliminated is still true
-            }}
-          />
-        ) : (
-          <SpectatorScreen players={players!} gameInfo={gameInfo!} />
-        )
+      ) : isEliminated ? (
+        <EliminatedScreen
+          gameCode={gameInfo!.code}
+          targetId={currentPlayerId}
+          onBackToLobby={() => {
+            setIsEliminated(false);
+            // This will now show the SpectatorScreen since isPlayerEliminated is still true
+          }}
+        />
       ) : (
         <ActiveGameScreen
           players={players!}
@@ -222,6 +218,7 @@ export default function GameScreen() {
           target={currentTarget!}
           isEliminated={isEliminated}
           currentPlayerId={currentPlayerId.current}
+          isSpectator={isPlayerEliminated}
         />
       )}
     </View>
