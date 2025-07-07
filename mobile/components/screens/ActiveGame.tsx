@@ -548,9 +548,9 @@ export const ActiveGameScreen = ({
         </Card>
 
         {/* QR Code Section */}
-        <Card className="mb-4">
+        <View className="mb-4">
           {showQRCode ? (
-            <View className="items-center space-y-4">
+            <View className="items-center space-y-4 rounded-2xl bg-white">
               <View className="rounded-lg bg-white p-4">
                 <QRCodeStyled
                   data={'https://pao.aleksander.cc/game' + '?gameCode=' + gameInfo.code}
@@ -583,7 +583,7 @@ export const ActiveGameScreen = ({
               <Text>Show QR Code</Text>
             </Button>
           )}
-        </Card>
+        </View>
 
         {/* Shoot Target button - only shown to alive players */}
         <Button className="mb-4" onPress={() => setIsShooting(true)} disabled={isUploading}>
