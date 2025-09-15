@@ -13,8 +13,7 @@ import { router } from 'expo-router';
 import { useUsernameStore } from '@/lib/username-store';
 
 export default function CreateGameScreen() {
-  const [gameName, setGameName] = useState('');
-  const [maxPlayers, setMaxPlayers] = useState('');
+  const [maxPlayers, setMaxPlayers] = useState('20'); // Changed default value
   const [isCreating, setIsCreating] = useState(false);
 
   const { username } = useUsernameStore();
@@ -42,12 +41,11 @@ export default function CreateGameScreen() {
     ) {
       Alert.alert('Error', 'Please enter a valid number of max players (2-100)');
       return;
-    }
+    };
 
     setIsCreating(true);
     try {
       const res = await api.post<{ code: string }>('/game', {
-        name: gameName.trim() ? gameName : `${username}'s game`,
         maxPlayers: Number(maxPlayers),
       });
 
@@ -95,16 +93,6 @@ export default function CreateGameScreen() {
       </View>
 
       <View className="space-y-2">
-        <View>
-          <Text className="mb-2 font-medium">Game Name</Text>
-          <Input
-            placeholder={`${username}'s game`}
-            value={gameName}
-            onChangeText={setGameName}
-            className="mb-4"
-          />
-        </View>
-
         <View>
           <Text className="mb-2 font-medium">Max Players</Text>
           <Input

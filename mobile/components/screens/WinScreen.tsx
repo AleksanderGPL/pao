@@ -6,6 +6,8 @@ import { ShadowView } from '../base/ShadowView';
 import { ScrollView } from 'react-native';
 import { Image } from 'expo-image';
 import { getShotImageUrl } from '@/lib/axios';
+import { Button } from '../Button';
+import { useRouter } from 'expo-router';
 
 const getRankColor = (rank: number) => {
   switch (rank) {
@@ -42,6 +44,7 @@ export const WinScreen = ({
   players: { id: number; user: { name: string }; isAlive: boolean }[];
   gameCode: string;
 }) => {
+  const router = useRouter();
   const topPlayers = leaderBoard
     .sort((a, b) => b.kills - a.kills)
     .slice(0, 3)
@@ -56,7 +59,7 @@ export const WinScreen = ({
       rank: index + 1,
     }));
   return (
-    <ScrollView contentContainerClassName="flex-1 bg-background py-8 items-center">
+    <ScrollView contentContainerClassName="bg-background py-8 items-center">
       {/* Header */}
       <View className="mb-8 items-center">
         <Text className="mb-2 text-3xl font-bold text-foreground">Game Complete!</Text>
@@ -162,6 +165,11 @@ export const WinScreen = ({
                 </View>
               </View>
             ))}
+        </View>
+        <View className="w-full max-w-md self-center px-4 pb-4">
+          <Button onPress={() => router.push('/(tabs)')} className="w-full">
+            <Text>Back to Menu</Text>
+          </Button>
         </View>
       </ShadowView>
     </ScrollView>

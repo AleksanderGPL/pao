@@ -24,6 +24,7 @@ import type { ApiResponse } from '@/app/game';
 import { api, getShotImageUrl } from '@/lib/axios';
 import { X, AlertCircle, Camera, Copy, QrCode, Eye } from 'lucide-react-native';
 
+
 const TargetOverlay = ({ player }: { player?: ApiResponse['players'][number] }) => {
   return (
     <View className="absolute left-4 right-4 top-10">
@@ -75,6 +76,7 @@ const CameraErrorView = ({ error, onRetry }: { error: string; onRetry: () => voi
 };
 
 const CameraPermissionView = ({ onRequestPermission }: { onRequestPermission: () => void }) => {
+  const [isPressing, setIsPressing] = useState(false);
   return (
     <View className="flex-1 items-center justify-center bg-gray-900 p-6">
       <View className="items-center space-y-4">
@@ -85,7 +87,14 @@ const CameraPermissionView = ({ onRequestPermission }: { onRequestPermission: ()
         <Text className="text-center text-white/80">
           This app needs camera access to take photos of your targets.
         </Text>
-        <Button onPress={onRequestPermission} className="mt-4">
+        <Button
+          onPress={() => {
+            console.log('Grant Permission button pressed!');
+            setIsPressing(true);
+            onRequestPermission();
+          }}
+          onPressOut={() => setIsPressing(false)}
+          className={`mt-4 ${isPressing ? 'opacity-70' : ''}`}>
           <Text>Grant Permission</Text>
         </Button>
       </View>
@@ -184,14 +193,18 @@ export const ActiveGameScreen = ({
   };
 
   const handleRequestPermission = async () => {
+    console.log('Attempting to request camera permission...');
     try {
       const result = await requestPermission();
+      console.log('Permission request result:', result);
       if (!result.granted) {
         Alert.alert(
           'Permission Required',
           'Camera permission is required to take photos. Please enable it in your device settings.',
           [{ text: 'OK' }]
         );
+      } else {
+        console.log('Camera permission granted!');
       }
     } catch (error) {
       console.error('Permission request error:', error);
@@ -323,14 +336,6 @@ export const ActiveGameScreen = ({
     setIsUploading(true);
     setUploadProgress(0);
 
-    // Simulate progress updates
-    const progressInterval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 90) return prev;
-        return prev + Math.random() * 10;
-      });
-    }, 200);
-
     try {
       console.log('Starting background upload...');
       console.log('Game code:', uploadData.gameCode);
@@ -383,6 +388,14 @@ export const ActiveGameScreen = ({
             'Content-Type': 'multipart/form-data',
           },
           timeout: 30000, // 30 second timeout
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const percentCompleted = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+              );
+              setUploadProgress(percentCompleted);
+            }
+          },
         }
       );
 
@@ -413,7 +426,6 @@ export const ActiveGameScreen = ({
       }, 1000);
     } finally {
       // Clean up
-      clearInterval(progressInterval);
       setIsUploading(false);
       setUploadProgress(0);
     }
@@ -568,7 +580,7 @@ export const ActiveGameScreen = ({
             <View className="items-center space-y-4 rounded-2xl bg-white">
               <View className="rounded-lg bg-white p-4">
                 <QRCodeStyled
-                  data={'https://pao.aleksander.cc/game' + '?gameCode=' + gameInfo.code}
+                  data={process.env.EXPO_PUBLIC_GAME_URL + '?gameCode=' + gameInfo.code}
                   className="aspect-square"
                   padding={20}
                   pieceSize={6}
@@ -612,7 +624,7 @@ export const ActiveGameScreen = ({
           <View className="mb-4 rounded-lg border border-green-200 bg-green-50 p-2">
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
-                <View className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+                <View className="h-2 w-2 rounded-full bg-green-500" />
                 <Text className="text-sm text-green-700">Uploading shot image...</Text>
               </View>
               <Text className="text-xs font-medium text-green-600">
@@ -621,7 +633,7 @@ export const ActiveGameScreen = ({
             </View>
             <View className="mt-1 h-1 rounded-full bg-green-100">
               <View
-                className="h-1 rounded-full bg-green-500 transition-all duration-300"
+                className="h-1 rounded-full bg-green-500"
                 style={{ width: `${uploadProgress}%` }}
               />
             </View>

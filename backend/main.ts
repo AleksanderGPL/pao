@@ -11,7 +11,9 @@ const app = new Hono();
 registerWsHandler(app);
 
 app.use(cors({
-  origin: FRONTEND_URLS,
+  origin: '*',
+  allowHeaders: ['Content-Type', 'Authorization'],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 }));
 
 app.get("/", (c) => {

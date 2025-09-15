@@ -89,7 +89,7 @@ export default function HomeScreen() {
     let extractedGameCode = data;
 
     // Check if the scanned data is a URL from our deployed website
-    if (data.includes('https://pao.aleksander.cc/game')) {
+    if (data.includes(process.env.EXPO_PUBLIC_GAME_URL!)) {
       try {
         console.log('data', data);
         const url = new URL(data);

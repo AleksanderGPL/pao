@@ -54,32 +54,7 @@ export default function TabLayout() {
           tabBarActiveTintColor: colors.activeTintColor,
           tabBarInactiveTintColor: colors.inactiveTintColor,
           headerShown: false,
-          tabBarButton: ThemedHapticTab,
-          tabBarBackground: TabBarBackground,
-
           tabBarShowLabel: false,
-          tabBarHideOnKeyboard: true,
-          tabBarStyle: Platform.select({
-            ios: {
-              // Use a transparent background on iOS to show the blur effect
-              position: 'absolute',
-              backgroundColor: '#fff',
-            },
-            default: {
-              height: 70,
-              backgroundColor: '#fff', // Always white
-              borderTopWidth: 0,
-              paddingHorizontal: 40,
-              borderRadius: 20,
-              marginHorizontal: 12,
-              marginBottom: 20,
-              position: 'absolute',
-            },
-          }),
-
-          tabBarIconStyle: {
-            height: 60,
-          },
         }}
         backBehavior="history">
         <Tabs.Screen

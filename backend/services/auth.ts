@@ -18,20 +18,34 @@ app.get("/", authRequired, (c) => {
 
 app.post(
   "/register",
-  zValidator("json", z.object({ name: z.string().min(1).max(256) })),
+  zValidator("json", z.object({ name: z.string().min(2).max(20) })),
   async (c) => {
     const { name } = c.req.valid("json");
 
-    const [user] = await db.insert(usersTable).values({ name }).returning();
+    try {
+      // Check if username is already taken
+      const existingUser = await db.query.usersTable.findFirst({
+        where: (users, { eq }) => eq(users.name, name),
+      });
 
-    const sessionToken = await generateSessionToken();
+      if (existingUser) {
+        return c.json({ error: "Username already taken" }, 409);
+      }
 
-    await db.insert(userSessionsTable).values({
-      sessionToken,
-      userId: user.id,
-    }).returning();
+      const [user] = await db.insert(usersTable).values({ name }).returning();
 
-    return c.json({ sessionToken });
+      const sessionToken = await generateSessionToken();
+
+      await db.insert(userSessionsTable).values({
+        sessionToken,
+        userId: user.id,
+      }).returning();
+
+      return c.json({ sessionToken });
+    } catch (e) {
+      console.error(e);
+      return c.json({ error: "A server error occurred" }, 500);
+    }
   },
 );
 

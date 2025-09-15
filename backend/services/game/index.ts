@@ -19,17 +19,18 @@ app.post(
   zValidator(
     "json",
     z.object({
-      name: z.string().min(1).max(256),
-      maxPlayers: z.number().min(2).max(100),
+      name: z.string().min(1).max(256).optional(),
+      maxPlayers: z.number().min(2).max(100).default(20),
     }),
   ),
   async (c) => {
     const { name, maxPlayers } = c.req.valid("json");
+    const gameName = name || c.get("session").user.name;
 
     const code = await generateLobbyCode();
 
     const [game] = await db.insert(lobbiesTable).values({
-      name,
+      name: gameName,
       maxPlayers,
       code,
     }).returning();
@@ -228,21 +229,25 @@ app.post(
   zValidator(
     "form",
     z.object({
-      image: z.instanceof(File)
-        .refine(
-          (file) => file.size > 0,
-          "Uploaded image cannot be empty.",
-        )
-        .refine((file) => file.size <= 1024 * 1024 * 5, {
-          message: "Image must be less than 5MB",
-        }).refine((file) => file.type.startsWith("image/"), {
-          message: "Image must be an image",
-        }),
+      image: z.any(),
     }),
   ),
   async (c) => {
     const { code, playerId } = c.req.valid("param");
     const { image } = c.req.valid("form");
+
+    if (!(image instanceof File)) {
+      return c.json({ error: "Image must be a file" }, 400);
+    }
+    if (image.size === 0) {
+      return c.json({ error: "Uploaded image cannot be empty" }, 400);
+    }
+    if (image.size > 1024 * 1024 * 5) {
+      return c.json({ error: "Image must be less than 5MB" }, 400);
+    }
+    if (!image.type.startsWith("image/")) {
+      return c.json({ error: "Image must be an image" }, 400);
+    }
 
     const game = await db.query.lobbiesTable.findFirst({
       where: eq(lobbiesTable.code, code),
@@ -310,10 +315,10 @@ app.post(
     }
 
     const sharpImage = sharp(await image.arrayBuffer());
-    sharpImage.avif({ quality: 50 });
+    sharpImage.resize({ width: 1080 }).jpeg({ quality: 80 });
     await uploadFileBuffer({
       buffer: await sharpImage.toBuffer(),
-      key: `game/${game.code}/player/${playerId}/shot.avif`,
+      key: `game/${game.code}/player/${playerId}/shot.jpg`,
     });
 
     await redis.publish(

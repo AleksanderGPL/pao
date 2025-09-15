@@ -19,7 +19,9 @@
           "recordAudioAndroid": false,
           "recordAudioIOS": false
         }
-      ]
+      ],
+      "expo-font",
+      "expo-router"
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -29,11 +31,17 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["assets/*", "assets/images/*", "assets/icons/*"],
+    "assetBundlePatterns": [
+      "assets/*",
+      "assets/images/*",
+      "assets/icons/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "UIBackgroundModes": ["audio"],
+        "UIBackgroundModes": [
+          "audio"
+        ],
         "NSMicrophoneUsageDescription": "This app does not use the microphone"
       }
     },
@@ -42,7 +50,9 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["android.permission.CAMERA"],
+      "permissions": [
+        "android.permission.CAMERA"
+      ],
       "package": "com.qazwsxedc123.pao"
     }
   }
