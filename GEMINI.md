@@ -315,8 +315,21 @@ This ensures your backend runs reliably in the background.
     Paste:
     ```bash
     #!/bin/bash
-    cd /home/pi/pao/backend
-    deno task start
+    # Navigate to the backend directory
+    cd /home/pi/pao/backend || { echo "Failed to change directory to /home/pi/pao/backend"; exit 1; }
+
+    # Source the .env file to load environment variables
+    if [ -f ./.env ]; then
+        set -a # Automatically export all variables
+        . ./.env
+        set +a
+    else
+        echo "Error: ./.env file not found! Backend will not start."
+        exit 1
+    fi
+
+    # Execute the Deno backend
+    /home/pi/.deno/bin/deno task start
     ```
     Make it executable:
     ```bash
