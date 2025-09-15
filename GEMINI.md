@@ -156,10 +156,24 @@ The project is divided into two main directories:
 2.  **Environment Variables:**
     Create a file named `.env` in the `mobile/` directory. This tells the app where to find the backend server.
 
+    ```env
+    EXPO_PUBLIC_API_BASE="https://<your-pi-domain>/api"
+    EXPO_PUBLIC_S3_BASE_URL="https://<your-r2-public-url>"
+    EXPO_PUBLIC_S3_BUCKET="<your-r2-bucket-name>"
+    EXPO_PUBLIC_GAME_URL="https://<your-pi-domain>/game"
     ```
-    EXPO_PUBLIC_API_BASE="http://<your-computer-ip>:8000"
+    **CRITICAL:**
+    *   `EXPO_PUBLIC_API_BASE` must point to your Nginx-proxied backend API endpoint, including `/api` and using `https` for production.
+    *   When running the app on a physical phone for development, you **must** replace `<your-computer-ip>` with your computer's actual IP address on your local network (e.g., `192.168.1.100`). You cannot use `localhost`.
+
+    **Important Note for `mobile/lib/axios.ts`:**
+    Ensure that `mobile/lib/axios.ts` sets the `baseURL` for Axios directly to `process.env.EXPO_PUBLIC_API_BASE` without appending an extra `/api` in the code. For example:
+    ```typescript
+    export const api = axios.create({
+      baseURL: process.env.EXPO_PUBLIC_API_BASE,
+      timeout: 10000,
+    });
     ```
-    **CRITICAL:** When running the app on a physical phone, you **must** replace `<your-computer-ip>` with your computer's actual IP address on your local network (e.g., `192.168.1.100`). You cannot use `localhost`. You can find your IP address on Linux/macOS by running `ip addr show` or `ifconfig`.
 
 3.  **Installation:**
     Navigate to the `mobile/` directory and install the dependencies:
@@ -346,15 +360,16 @@ sudo nano /etc/systemd/system/pao-backend.service
     After=network.target
 
     [Service]
-    User=pi
-    Group=pi
+    # Run the start script as the 'pi' user.
+    # We use sudo -u pi here instead of systemd's User= directive
+    # to avoid issues with environment and PATH for Deno.
     WorkingDirectory=/home/pi/pao/backend
-    ExecStart=/home/pi/pao/backend/start_backend.sh
+    ExecStart=/usr/bin/sudo -u pi /home/pi/pao/backend/start_backend.sh
     Restart=always
     RestartSec=5
     StandardOutput=journal
     StandardError=journal
-    EnvironmentFile=/home/pi/pao/backend/.env
+    # EnvironmentFile=/home/pi/pao/backend/.env # Removed: .env is now sourced in start_backend.sh
 
     [Install]
     WantedBy=multi-user.target
@@ -402,3 +417,30 @@ To build an Android APK, use Expo Application Services (EAS) build servers.
     eas build --platform android --profile android_apk
     ```
     You'll get a link to download the APK once the build is complete.ting platform.ovided `Dockerfile` in the `backend` directory can be used to build a container image for deployment to services like AWS ECS, Google Cloud Run, or any other container hosting platform.ting platform.
+
+### Deployment Troubleshooting
+
+This section covers common issues encountered during deployment and their solutions.
+
+**1. Changes not reflecting after deployment (Web Frontend)**
+If your web frontend changes are not visible after rebuilding and copying files:
+*   **Ensure a clean build:** Always use `bunx expo export --clear` to ensure a fresh build.
+*   **Correct copy command:** Verify you are copying the `dist` contents to the correct Nginx `root` directory (e.g., `sudo cp -r dist/* /var/www/your-domain/html/`).
+*   **Clear browser cache:** Perform a hard refresh or clear your browser's cache for your domain.
+
+**2. `systemd` service fails to start (`status=217/USER`, `Failed to load environment files`, `more than one ExecStart`)**
+These errors often indicate issues with the `pao-backend.service` file or its interaction with the `start_backend.sh` script.
+*   **Verify `start_backend.sh`:** Ensure it has the correct shebang (`#!/bin/bash`), `cd` to the backend directory, sources the `.env` file, and uses the absolute path for `deno` (e.g., `/home/pi/.deno/bin/deno task start`).
+*   **Verify `pao-backend.service`:**
+    *   **Remove `EnvironmentFile`:** If you're sourcing `.env` in `start_backend.sh`, remove the `EnvironmentFile=/path/to/.env` line from the service file.
+    *   **Use `sudo -u pi` in `ExecStart`:** To avoid `status=217/USER` errors, use `ExecStart=/usr/bin/sudo -u pi /home/pi/pao/backend/start_backend.sh` and remove `User=` and `Group=` directives from the `[Service]` section.
+    *   **Single `ExecStart`:** Ensure there is *only one* `ExecStart` line in the `[Service]` section.
+*   **Reload and Restart:** Always run `sudo systemctl daemon-reload` and `sudo systemctl restart pao-backend.service` after modifying the service file.
+*   **Check Logs:** Use `journalctl -u pao-backend.service -f` for detailed error messages.
+
+**3. Camera Permissions not working on Mobile Web**
+If the "Grant Permission" button does nothing or no prompt appears:
+*   **Browser Console:** Check the browser's developer console for any JavaScript errors or warnings when the button is pressed.
+*   **Browser Settings:** Manually check the site settings in the mobile browser to see if camera permissions are already denied or pending.
+*   **Add Logging:** Temporarily add `console.log` statements to the `handleRequestPermission` function in `mobile/components/screens/ActiveGame.tsx` to trace the execution flow and permission results.
+*   **Secure Context:** Ensure your site is served over `https`. Camera access often requires a secure context.
